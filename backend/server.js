@@ -84,16 +84,16 @@ router.post('/putData', (req, res) => {
 router.post('/putDataToken', (req, res) => {
   let data = new Data();
 
-  const { token, message } = req.body;
+  const { user, message } = req.body;
 
-  if ((!token && token !== 0) || !message) {
+  if ((!user && user !== 0) || !message) {
     return res.json({
       success: false,
       error: 'INVALID INPUTS',
     });
   }
   data.message = message;
-  data.token = token;
+  data.user = user;
   data.save((err) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });

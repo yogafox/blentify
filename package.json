@@ -15,5 +15,6 @@
   "bugs": {
     "url": "https://github.com/yogafox/blentify/issues"
   },
-  "homepage": "https://github.com/yogafox/blentify#readme"
+  "homepage": "https://github.com/yogafox/blentify#readme",
+  "dependencies": {}
 }
