@@ -24,6 +24,22 @@ let recordString = JSON.stringify(exampleRecord),
     settingString = JSON.stringify(exampleSetting);
 
 class App extends React.Component {
+    gameStatusReceiver = (key) => {
+        // what state should be updated to render main page.
+        // this function would be called if the game ended or saved
+        // key = {
+        //     gameStatus: String,
+        //     record: recordString
+        // };
+        if (key.gameStatus === "Game End") {
+            // Todo
+        }
+        else if (key.gameStatus === "Game Save") {
+            // Todo: send recorded data string to DB
+            this.userSaver(this.state.user, key.record);
+        }
+        this.setState(()=>({ status : "MainPage" }));
+    };
     userGameDeleter = () => {
         // Todo
     };
@@ -45,22 +61,26 @@ class App extends React.Component {
         }
         this.setState(() => ({userGames : userGames}));
     };
-    gameStatusReceiver = (key) => {
-        // what state should be updated to render main page.
-        // this function would be called if the game ended or saved
-        // key = {
-        //     gameStatus: String,
-        //     record: recordString
-        // };
-        if (key.gameStatus === "Game End") {
-            // Todo
-        }
-        else if (key.gameStatus === "Game Save") {
-            // Todo: send recorded data string to DB
-            this.userSaver(this.state.user, key.record);
-        }
-        this.setState(()=>({ status : "MainPage" }));
+    newGameOnClick = () => {
+        let game = (<Game user={"123"}
+                          palette={palette}
+                          setting={settingString}
+                          record={recordString}
+                          callRecv={this.gameStatusReceiver.bind(this)}
+                    />);
+        this.setState(() => ({playing : game}));
     };
+    gameLoaderOnClick = () => {
+        // Todo
+    };
+
+    constructor(props) {
+        super(props);
+        this.state = { status : "Welcome" };
+    }
+    componentWillMount() {
+        this.newGameOnClick();
+    }
 
     componentDidMount() {
         this.getDataFromDb();
@@ -93,12 +113,7 @@ class App extends React.Component {
     render() {
         return (
             <div className="App">
-                <Game user={"testABC"}
-                      palette={palette}
-                      setting={settingString}
-                      record={recordString}
-                      callRecv={this.gameStatusReceiver.bind(this)}
-                />
+                {this.state.playing}
             </div>
         );
     }
