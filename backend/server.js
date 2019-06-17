@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const Data = require('./data');
 
+const passport = require('passport');
+const SpotifyStrategy = require('passport-spotify').Strategy;
+
 const API_PORT = 3001;
 const app = express();
 app.use(cors());
@@ -13,23 +16,59 @@ const router = express.Router();
 
 
 // this is our MongoDB database
-const dbRoute = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+//const dbRoute = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
 
 // connects our back end code with the database
-mongoose.connect(dbRoute, { useNewUrlParser: true });
+//mongoose.connect(dbRoute, { useNewUrlParser: true });
 
-let db = mongoose.connection;
+//let db = mongoose.connection;
 
-db.once('open', () => console.log('connected to the database'));
+//db.once('open', () => console.log('connected to the database'));
 
 // checks if connection with the database is successful
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+//db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger('dev'));
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: "81142cfcbf1d46e0914d306bbe0c64d7",
+      clientSecret: "2e5ebb14833949b6a88786acd6867237",
+      callbackURL: 'http://localhost:3001/auth/spotify/callback'
+    },
+    function(accessToken, refreshToken, expires_in, profile, done) {
+      console.log(profile);
+      return done(null, { username: "w" });
+      /*
+      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
+        return done(err, user);
+      });
+      */
+    }
+  )
+);
+
+app.get('/auth/spotify', passport.authenticate('spotify'), function(req, res) {
+  // The request will be redirected to spotify for authentication, so this
+  // function will not be called.
+});
+
+app.get(
+  '/auth/spotify/callback',
+  passport.authenticate('spotify', { failureRedirect: '/loginFail' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('http://localhost:3000');
+  }
+);
 
 // this is our get method
 // this method fetches all available data in our database
