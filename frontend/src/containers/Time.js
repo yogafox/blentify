@@ -30,7 +30,7 @@ class Time extends React.Component {
         return (
             <div className="Time">
                 <p className="Timer">
-                    {this.state.time}
+                    {Math.floor(this.state.time / 60)} ： {this.state.time % 60}
                 </p>
             </div>
         );

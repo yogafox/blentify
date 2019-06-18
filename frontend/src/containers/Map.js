@@ -12,8 +12,7 @@ const shuffleArray = function (array) {
 
 class Map {
     // constant values
-    static MAX_DIFFICULTY = 4;
-    static MAX_TYPE = 9;
+    MAX_MAP_TYPE = 9;
 
     // static COLOR_TYPE = 'RGB';
     static COLOR_TYPE = 'HSL';
@@ -367,7 +366,7 @@ class Map {
                 let id = this.mapToId[row][column],
                     status = this.mapStatus[row][column],
                     color = this.idToColor[id];
-                if (status === "Blank") color = [0, 0, 0];
+                if (status === "Space") color = [0, 0, 0];
                 if (type === "status") rowOut.push(status);
                 else if (type === "color") rowOut.push(color);
             }
@@ -379,7 +378,7 @@ class Map {
         if (type !== 0) {
             this.type = type;
         } else {
-            this.type = randomInt(1, Map.MAX_TYPE);
+            this.type = randomInt(1, this.MAX_MAP_TYPE);
         }
     };
 
@@ -461,8 +460,8 @@ class Map {
             for (let row = 0; row < this.height; row++) {
                 for (let column = 0; column < this.width; column++) {
                     if (row % 2 === 1) {
-                        lineStatus.push("Blank");
-                        lineToId.push("Blank");
+                        lineStatus.push("Space");
+                        lineToId.push("Space");
                         continue;
                     }
                     lineStatus.push("Color");
@@ -495,8 +494,8 @@ class Map {
                         this.idToMap[mapId] = [row, column];
                         mapId++;
                     } else {
-                        lineStatus.push("Blank");
-                        lineToId.push("Blank");
+                        lineStatus.push("Space");
+                        lineToId.push("Space");
                     }
                 }
                 this.mapStatus.push(lineStatus);
@@ -524,8 +523,8 @@ class Map {
                         this.idToMap[mapId] = [row, column];
                         mapId++;
                     } else {
-                        lineStatus.push("Blank");
-                        lineToId.push("Blank");
+                        lineStatus.push("Space");
+                        lineToId.push("Space");
                     }
                 }
                 this.mapStatus.push(lineStatus);
@@ -605,8 +604,8 @@ class Map {
                         this.idToMap[mapId] = [row, column];
                         mapId++;
                     } else {
-                        lineStatus.push("Blank");
-                        lineToId.push("Blank");
+                        lineStatus.push("Space");
+                        lineToId.push("Space");
                     }
                 }
                 this.mapStatus.push(lineStatus);
@@ -644,8 +643,8 @@ class Map {
                             this.idToMap[mapId] = [row, column];
                             mapId++;
                         } else {
-                            lineStatus.push("Blank");
-                            lineToId.push("Blank");
+                            lineStatus.push("Space");
+                            lineToId.push("Space");
                         }
                     }
                     this.mapStatus.push(lineStatus);

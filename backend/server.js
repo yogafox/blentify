@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
 var cors = require('cors');
@@ -14,19 +14,21 @@ const app = express();
 app.use(cors());
 const router = express.Router();
 
+const spotify_router = require('./router/spotify')
+
 
 // this is our MongoDB database
-//const dbRoute = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+const dbRoute = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
 
 // connects our back end code with the database
-//mongoose.connect(dbRoute, { useNewUrlParser: true });
+mongoose.connect(dbRoute, { useNewUrlParser: true });
 
-//let db = mongoose.connection;
+let db = mongoose.connection;
 
-//db.once('open', () => console.log('connected to the database'));
+db.once('open', () => console.log('connected to the database'));
 
 // checks if connection with the database is successful
-//db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
@@ -37,6 +39,19 @@ app.use(logger('dev'));
 app.use(passport.initialize())
 app.use(passport.session())
 
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  /*
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+  */
+});
+
+
 passport.use(
   new SpotifyStrategy(
     {
@@ -44,29 +59,45 @@ passport.use(
       clientSecret: "2e5ebb14833949b6a88786acd6867237",
       callbackURL: 'http://localhost:3001/auth/spotify/callback'
     },
-    function(accessToken, refreshToken, expires_in, profile, done) {
+    function(access_token, refresh_token, expires_in, profile, done) {
       console.log(profile);
-      return done(null, { username: "w" });
-      /*
-      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
-        return done(err, user);
-      });
-      */
+      return done(null, 
+        { id: profile.id,
+          access_token: access_token,
+          refresh_token: refresh_token,
+          expire: expires_in,
+        });
+    //  User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
+    //    return done(err, user);
+    //  });
     }
   )
 );
 
-app.get('/auth/spotify', passport.authenticate('spotify'), function(req, res) {
+app.get(
+  '/auth/spotify', 
+  passport.authenticate('spotify', {
+    scope: ['user-read-email', 'user-read-private'],
+    showDialog: true
+  }), function(req, res) {
   // The request will be redirected to spotify for authentication, so this
   // function will not be called.
 });
 
 app.get(
   '/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: '/loginFail' }),
+  passport.authenticate('spotify', { failureRedirect: 'http://localhost:3000' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('http://localhost:3000');
+    console.log(req);
+    res.redirect('http://localhost:3000/mainpage' + 
+      '/?access_token=' +
+      req.user.access_token +
+      '&refresh_token=' +
+      req.user.refresh_token + 
+      '&expire=' + 
+      req.user.expires_in
+    );
   }
 );
 
@@ -123,16 +154,16 @@ router.post('/putData', (req, res) => {
 router.post('/putDataToken', (req, res) => {
   let data = new Data();
 
-  const { token, message } = req.body;
+  const { user, message } = req.body;
 
-  if ((!token && token !== 0) || !message) {
+  if ((!user && user !== 0) || !message) {
     return res.json({
       success: false,
       error: 'INVALID INPUTS',
     });
   }
   data.message = message;
-  data.token = token;
+  data.user = user;
   data.save((err) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
@@ -141,6 +172,7 @@ router.post('/putDataToken', (req, res) => {
 
 // append /api for our http requests
 app.use('/api', router);
+app.use('/api/spotify', spotify_router);
 
 // launch our backend into a port
 app.listen(API_PORT, () => console.log(`LISTENING ON PORT ${API_PORT}`));
