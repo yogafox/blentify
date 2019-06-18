@@ -15,13 +15,10 @@ let exampleRecord = {
     lock: "Array of locked index",
 };
 
-let exampleSetting = {
+let defaultSetting = {
     style: "default",
-    difficulty: "Integer", // [0, 3], 0 means random
+    difficulty: +0 // [0, 3], 0 means random
 };
-
-let recordString = JSON.stringify(exampleRecord),
-    settingString = JSON.stringify(exampleSetting);
 
 class App extends React.Component {
     gameStatusReceiver = (key) => {
@@ -31,24 +28,34 @@ class App extends React.Component {
         //     gameStatus: String,
         //     record: recordString
         // };
-        if (key.gameStatus === "Game End") {
+        if (key.gameStatus === "end") {
             // Todo
+            console.log("end game");
+            this.setState(()=>({ page : "main" }));
         }
-        else if (key.gameStatus === "Game Save") {
+        else if (key.gameStatus === "save") {
             // Todo: send recorded data string to DB
+            console.log("save game");
+            console.log(this.state.user);
             this.userSaver(this.state.user, key.record);
+            this.setState(()=>({ page : "main" }));
         }
-        this.setState(()=>({ status : "MainPage" }));
+        else if (key.gameStatus === "exit") {
+            console.log("exit game");
+            this.userSaver(this.state.user, key.record);
+
+        }
     };
     userGameDeleter = () => {
         // Todo
     };
     userSaver = (user, gameRecord) => {
-        let message = {
+        let data = {
             user: user,
             image: "An Image Object",
             record: gameRecord
         };
+        let message = JSON.stringify(data);
         this.putDataToDB(user, message);
     };
     userLoader = (user) => {
@@ -61,22 +68,44 @@ class App extends React.Component {
         }
         this.setState(() => ({userGames : userGames}));
     };
-    newGameOnClick = () => {
-        let game = (<Game user={"123"}
-                          palette={palette}
-                          setting={settingString}
-                          record={recordString}
-                          callRecv={this.gameStatusReceiver.bind(this)}
-                    />);
-        this.setState(() => ({playing : game}));
+    setStyleOnClick = () => {
+        // Todo
     };
-    gameLoaderOnClick = () => {
+    setDifficultyOnClick = () => {
+        // Todo
+    };
+    settingOnClick = () => {
+        // Todo
+        // Render Setting Menu && set setting state && refresh settingString
+    };
+    mainPageOnClick = () => {
+        // Todo
+        // Change this.page to make game call gameStatusReceiver
+        this.setState(() => ({page : "main"}));
+    };
+    newGameOnClick = () => {
+        if (this.state.status === "logout") {
+            this.setState(() => ({palette : [],
+                                        record : ""}));
+        }
+        this.setState(() => ({page : "game"}));
+    };
+    gameLoaderOnClick = (event) => {
+        let nextGameTarget = event.target;
         // Todo
     };
 
     constructor(props) {
         super(props);
-        this.state = { status : "Welcome" };
+        let settingString = JSON.stringify(defaultSetting);
+        this.state = {
+            page: "main",
+            user: "none",
+            status: "logout",
+            palette: [],
+            setting: settingString,
+            record: ""
+        };
     }
     componentWillMount() {
         this.newGameOnClick();
@@ -105,17 +134,32 @@ class App extends React.Component {
 
     putDataToDB = (user, message) => {
         axios.post('http://localhost:3001/api/putDataToken', {
-            user: user,
+            token: user,
             message: message,
         });
     };
 
     render() {
-        return (
-            <div className="App">
-                {this.state.playing}
-            </div>
-        );
+        if (this.state.page === "main") {
+            return (
+                <button onClick={this.newGameOnClick}>NewGame</button>
+            );
+        }
+        else if (this.state.page === "game") {
+            return (
+                <div className="App">
+                    <button onClick={this.mainPageOnClick}>MainPage</button>
+                    <Game palette={this.state.palette}
+                          setting={this.state.setting}
+                          record={this.state.record}
+                          callRecv={this.gameStatusReceiver.bind(this)}
+                    />
+                </div>
+            );
+        }
+        else if (this.state.page === "") {
+
+        }
     }
 }
 

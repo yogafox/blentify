@@ -13,6 +13,7 @@ const shuffleArray = function (array) {
 class Map {
     // constant values
     MAX_MAP_TYPE = 9;
+    static diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [8, 9]];
 
     // static COLOR_TYPE = 'RGB';
     static COLOR_TYPE = 'HSL';
@@ -475,7 +476,7 @@ class Map {
                 lineToId = [];
             }
             this.tileCount = mapId;
-            this.lineCount = Map.floor(this.height / 2);
+            this.lineCount = Math.floor(this.height / 2);
         }
         else if (type === 3) {
             this.middle = Math.floor(this.width / 2);

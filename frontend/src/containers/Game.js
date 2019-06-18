@@ -12,19 +12,20 @@ const randomChoice = function (array) {
 };
 
 class Game extends React.Component {
-    MAX_DIFFICULTY = 4;
-    diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [8, 9]];
+    MAX_DIFFICULTY = 3;
 
-    diffToType = (difficulty) => randomChoice(this.diffTypeMap[difficulty]);
+    diffToType = (difficulty) => {
+        return randomChoice(Map.diffTypeMap[difficulty]);
+    };
 
     timeReceiver = (key) => {
         this.time = key.time;
         this.setState({time : key.time});
     };
-
-    AfterGameEnded = (type) => {
+    recordSaver = (type) => {
+        console.log("saving record");
         let record = {
-            map: "A Map Object",
+            map: this.map,
             time: "Integer",
             history: "Array of moves",
             candidate: "Array of color in place",
@@ -38,7 +39,27 @@ class Game extends React.Component {
         };
         this.gameStatusSender(key);
     };
+    prevOnClick = () => {
 
+    };
+    nextOnClick = () => {
+
+    };
+    resetOnClick = () => {
+
+    };
+    hintOnClick = () => {
+
+    };
+    captureOnClick = () => {
+
+    };
+    answerOnClick = () => {
+
+    };
+    backOnClick = () => {
+
+    };
     constructor(props) {
         super(props);
         this.gameStatusSender = this.props.callRecv;
@@ -54,16 +75,27 @@ class Game extends React.Component {
         }
         else {
             // New Game
-            this.difficuly = (this.setting.difficulty === 0) ?
+            this.difficulty = (this.setting.difficulty === 0) ?
                 randomInt(1, this.MAX_DIFFICULTY) : this.setting.difficulty;
             this.type = this.diffToType(this.difficulty);
             this.map = new Map(this.type, this.props.palette);
         }
     }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        let newSetting = nextProps.setting;
+
+    }
+
+    componentWillUnmount() {
+        this.recordSaver("exit");
+    }
+
     render() {
         return (
-            <Time initTime={+this.state.time} callRecv={this.timeReceiver.bind(this)}/>
+            <div>
+                <Time initTime={+this.state.time} callRecv={this.timeReceiver.bind(this)}/>
+            </div>
         );
     }
     componentDidMount() {
@@ -73,11 +105,10 @@ class Game extends React.Component {
 }
 
 Game.propTypes = {
-    user: PropTypes.string,
     palette: PropTypes.array,
     setting: PropTypes.string,
     record: PropTypes.string,
-    callRecv: PropTypes.func
+    callRecv: PropTypes.func,
 };
 
 export default Game;
