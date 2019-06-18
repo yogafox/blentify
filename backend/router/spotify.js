@@ -10,18 +10,18 @@ var spotifyApi = new SpotifyWebApi({
     callbackURL: 'http://localhost:3001/auth/spotify/callback'
 });
 
-spotify_router.post('/setToken', (req, res) => {
-    console.log(req.body);
-    const { access_token } = req.body;
-    console.log("set access token:", access_token);
+function setAccessToken(access_token) {
     spotifyApi.setAccessToken(access_token);
-})
+}
 
 // this is our get method
 // this method fetches all available data in our database
 spotify_router.get('/search', (req, res) => {
-    const { key } = req.query;
+    const { key, session } = req.query;
+    spotifyApi.setAccessToken(session);
+
     console.log(spotifyApi.getAccessToken());
+    
 
     // Search tracks whose name, album or artist contains 'Love'
     spotifyApi.searchTracks(key)
