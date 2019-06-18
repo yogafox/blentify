@@ -8,8 +8,8 @@ import MainPage from './containers/MainPage';
 import './App.css';
 
 const APP_HOST = "http://localhost";
-const APP_API_PORT = 3000;
-const APP_CLIENT_PORT = 3001;
+const APP_API_PORT = 3001;
+const APP_CLIENT_PORT = 3000;
 
 let palette = [[123, 123, 123], [123, 222, 234]]; // An array of RGB color
 
