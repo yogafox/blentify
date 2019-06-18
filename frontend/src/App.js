@@ -7,16 +7,11 @@ import MainPage from './containers/MainPage';
 //import logo from './logo.svg';
 import './App.css';
 
-let palette = [[123, 123, 123], [123, 222, 234]]; // An array of RGB color
+const APP_HOST = "http://localhost";
+const APP_API_PORT = 3000;
+const APP_CLIENT_PORT = 3001;
 
-let exampleRecord = {
-    map: "A Map Object",
-    time: "Integer",
-    history: "Array of moves",
-    candidate: "Array of color in place",
-    ground: "Array of color in place",
-    lock: "Array of locked index",
-};
+let palette = [[123, 123, 123], [123, 222, 234]]; // An array of RGB color
 
 let defaultSetting = {
     style: "default",
@@ -95,14 +90,14 @@ class App extends React.Component {
           this.getSpotifyURL({
               client_id: '81142cfcbf1d46e0914d306bbe0c64d7',
               scopes: ['user-read-email', 'user-read-private'],
-              redirect_uri: 'http://localhost:3000/'
+              redirect_uri: APP_HOST + ':' + APP_CLIENT_PORT + '/'
           }),
           'Login with Spotify',
           'width=800,height=600'
         );
         
         window.spotifyCallback = (access_token) => {
-            popup.close()
+            popup.close();
             console.log(access_token);
             this.setState(() => ({
                 session: access_token,
@@ -141,8 +136,8 @@ class App extends React.Component {
             session: null    // TODO
         };
     }
+
     componentWillMount() {
-        // this.newGameOnClick();
         var token = window.location.hash.substr(1).split('&')[0].split("=")[1];
         if (token) {
             window.opener.spotifyCallback(token);
@@ -155,7 +150,6 @@ class App extends React.Component {
             }));
         }
     }
-
     componentDidMount() {
         this.getDataFromDb();
         if (!this.state.intervalIsSet) {
@@ -172,25 +166,17 @@ class App extends React.Component {
     }
 
     getDataFromDb = () => {
-        fetch('http://localhost:3001/api/getData')
+        fetch(APP_HOST + ':' + APP_API_PORT + '/api/getData')
             .then((data) => data.json())
             .then((res) => this.setState({data: res.data}));
     };
 
     putDataToDB = (user, message) => {
-        axios.post('http://localhost:3001/api/putDataToken', {
+        axios.post(APP_HOST + ':' + APP_API_PORT + '/api/putDataToken', {
             token: user,
             message: message,
         });
     };
-
-    GameWrap = () => {
-        return (
-            <div className="App">
-                {this.state.playing}
-            </div>
-        );
-    }
         
     render() {
         if (this.state.page === "welcome") {
