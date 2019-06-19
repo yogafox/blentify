@@ -1,3 +1,13 @@
+.vertical-align {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  margin: 0px 10px;
+}
+
 .App {
   width: 100vw;
   height: 100vh;

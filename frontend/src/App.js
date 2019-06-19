@@ -6,6 +6,7 @@ import Game from './containers/Game';
 import MainPage from './containers/MainPage';
 //import logo from './logo.svg';
 import './App.css';
+import './spotify.css';
 
 const APP_HOST = "http://localhost";
 const APP_API_PORT = 3001;
@@ -85,6 +86,15 @@ class App extends React.Component {
               '&response_type=token';
     }
 
+    logoutClick = () => {
+        localStorage.removeItem('session');
+        localStorage.removeItem('expire');
+        this.setState(() => ({
+          status: "logout",
+          page: "welcome"
+        }));
+    }
+
     loginClick = () => {
         var popup = window.open(
           this.getSpotifyURL({
@@ -103,9 +113,10 @@ class App extends React.Component {
                 session: access_token,
                 page: "main"
             }));
+            localStorage.setItem('expire', new Date().getTime());
             localStorage.setItem('session', access_token);   // TODO: check necessarility
-        }
-    }
+        };
+    };
     mainPageOnClick = () => {
         // Todo
         // Change this.page to make game call gameStatusReceiver
@@ -146,10 +157,19 @@ class App extends React.Component {
         if (localStorage.getItem('session', null)) {
             this.setState(() => ({
                 session: localStorage.getItem('session'),
+                status: "login",
                 page: "main"
             }));
         }
     }
+
+    componentWillUpdate() {
+        var time = new Date().getTime();
+        if (time - (localStorage.getItem('expire') || time) > 3600000) {
+            this.logoutClick();
+        }
+    }
+
     componentDidMount() {
         this.getDataFromDb();
         if (!this.state.intervalIsSet) {
@@ -179,10 +199,11 @@ class App extends React.Component {
     };
         
     render() {
+        console.log(this.state);
         if (this.state.page === "welcome") {
             return (
                 <div>
-                  <button onClick={this.loginClick}>Login</button>
+                  <button className="button-dark" onClick={this.loginClick}>Login</button>
                   <button onClick={this.newGameOnClick}>NewGame</button>
                 </div>
             );
@@ -190,9 +211,12 @@ class App extends React.Component {
 
         if (this.state.page === "main") {
             return (
-                <div>
+                <div>        
+                    <MainPage 
+                      session={this.state.session}
+                      callLogout={this.logoutClick.bind(this)}
+                    />
                     <button onClick={this.newGameOnClick}>NewGame</button>
-                    <MainPage session={this.state.session}/>
                 </div>
             );
         }
