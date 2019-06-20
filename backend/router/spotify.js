@@ -19,9 +19,7 @@ function setAccessToken(access_token) {
 spotify_router.get('/search', (req, res) => {
     const { key, session } = req.query;
     spotifyApi.setAccessToken(session);
-
     console.log(spotifyApi.getAccessToken());
-    
 
     // Search tracks whose name, album or artist contains 'Love'
     spotifyApi.searchTracks(key)
@@ -31,6 +29,18 @@ spotify_router.get('/search', (req, res) => {
         }, function(err) {
             console.error(err);
         });
-  });
+});
+
+spotify_router.get('/getme', (req, res) => {
+    const { session } = req.query;
+    spotifyApi.setAccessToken(session);
+
+    spotifyApi.getMe()
+        .then(function(data) {
+            return res.json(data.body);
+        }, function(err) {
+            console.log(err);
+        });
+})
 
 module.exports = spotify_router;

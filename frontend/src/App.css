@@ -8,6 +8,19 @@
   margin: 0px 10px;
 }
 
+span[onclick] {
+  cursor: pointer;
+}
+
+button#search {
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+}
+
 .App {
   width: 100vw;
   height: 100vh;
