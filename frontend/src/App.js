@@ -1,13 +1,18 @@
 import React from 'react';
 import axios from 'axios';
+import ColorThief from 'color-thief';
+
+import Modal from './module/modal';
 
 import Game from './containers/Game';
 import MainPage from './containers/MainPage';
 import Pool from './containers/Pool';
+import Search from './containers/Search';
 import Header from './components/Header';
 //import logo from './logo.svg';
-import './App.css';
-import './spotify.css';
+import './css/App.css';
+import './css/spotify.css';
+import './css/modal.css';
 
 const APP_HOST = "http://localhost";
 const APP_API_PORT = 3001;
@@ -144,6 +149,27 @@ class App extends React.Component {
             await this.searchSpotify(input.value);
         }
     };
+    trackOnClick = (event) => {
+        let track = event.target;
+        Modal.confirm({
+            title: 'Confirm Dialog',
+            message: 'Create a new game with ' + track.childNodes[2].childNodes[0].innerText,
+            buttonClass: 'green',
+            onConfirm: () => {
+                this.playTrack(track);
+                this.setState(() => ({
+                    page: "game"
+                }));
+            }
+          });
+    };
+
+    playTrack = (track) => {
+        let img = track.childNodes[0].childNodes[0];
+        let imgUrl = this.state.tracks[track.id].album.images[0].url;
+        this.getPalette(imgUrl);
+        // TODO: play the track
+    }
 
     searchSpotify = (key) => {
         const { session } = this.state;
@@ -156,10 +182,18 @@ class App extends React.Component {
         fetch(url)
             .then((data) => data.json())
             .then((data) => {
-                this.setState(() => ({ 
-                    tracks: data.tracks.items,
-                    search: true 
-                }));
+                if (data.tracks.items.length) {
+                    this.setState(() => ({ 
+                        tracks: data.tracks.items,
+                        search: true 
+                    }));
+                }
+                else {
+                    Modal.alert({
+                        message: 'No results found!',
+                        buttonClass: 'green'
+                    })
+                }
             });
     } 
 
@@ -182,9 +216,22 @@ class App extends React.Component {
             })
     }
 
+    getPalette(sourceImageUrl) {
+        let img = new Image();
+        img.onload = () => {
+            this.playingImg = img;
+            this.playingPalette = this.colorThief.getPalette(img);
+            //console.log(this.playingPalette);
+        };
+        img.crossOrigin = 'Anonymous';
+        img.src = sourceImageUrl;
+    }
+
     constructor(props) {
         super(props);
         let settingString = JSON.stringify(defaultSetting);
+
+        this.colorThief = new ColorThief();
         this.state = {
             page: "welcome",
             status: "logout",
@@ -194,8 +241,8 @@ class App extends React.Component {
             session: null,    // TODO
             user: {
                 id: 0,                  // unique
-                name: "Adam Levine",    // not guaranteed to be unique
-                img: "https://s3-us-west-2.amazonaws.com/s.cdpn.io/7022/adam_proPic.jpg"
+                name: null,    // not guaranteed to be unique
+                img: null
             },
             tracks: null,
             search: false
@@ -264,7 +311,8 @@ class App extends React.Component {
         if (this.state.page === "welcome") {
             return (
                 <div>
-                    <Header callLogout={this.logoutOnClick.bind(this)} 
+                    <Header page={this.state.page}
+                            callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} />
                     <button className="button-dark" onClick={this.loginOnClick}>Login</button>
                     <button onClick={this.newGameOnClick}>NewGame</button>
@@ -273,10 +321,15 @@ class App extends React.Component {
         }
 
         if (this.state.page === "main") {
-            let page = this.state.search? <Search tracks={this.state.tracks}/>:<Pool />;
+            let page = this.state.search? 
+                <Search tracks={this.state.tracks}
+                        selectTrack={this.trackOnClick.bind(this)}/>
+                :
+                <Pool />;
             return (
                 <div>     
                     <Header user={this.state.user}
+                            page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
@@ -290,6 +343,7 @@ class App extends React.Component {
             return (
                 <div className="App">
                     <Header user={this.state.user}
+                            page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
@@ -306,41 +360,6 @@ class App extends React.Component {
 
         }
     }
-}
-
-
-const Search = ({tracks, select}) => {
-    let listTracks = tracks.map((track, idx) => {
-        let explicit = track.explicit? 
-            (<div className="track__explicit" key={idx}>
-                <span className="label">Explicit</span>
-            </div>)
-            :
-            null;
-        let artists = track.artists.map((artist, idx) => (
-                <span className="feature" key={idx}>{artist.name}</span>
-            ));
-        
-        return (
-            <div className="track" key={idx} id={idx}>
-                <div className="track__art">
-                    <img src={track.album.images[2].url} alt={track.album.name} />
-                </div>
-                <div className="track__number">{idx+1}</div>
-                <div className="track__title featured">
-                    <span className="title">{track.name}</span>
-                    {artists}
-                </div>
-                {explicit}
-            </div>
-        );
-    });
-
-    return (
-        <div className="tracks">
-            {listTracks}
-        </div>
-    );
 }
 
 export default App;
