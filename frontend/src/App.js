@@ -5,10 +5,10 @@ import ColorThief from 'color-thief';
 import Modal from './module/modal';
 
 import Game from './containers/Game';
-import MainPage from './containers/MainPage';
 import Pool from './containers/Pool';
 import Search from './containers/Search';
 import Header from './components/Header';
+import Player from './containers/Player';
 //import logo from './logo.svg';
 import './css/App.css';
 import './css/spotify.css';
@@ -149,26 +149,36 @@ class App extends React.Component {
             await this.searchSpotify(input.value);
         }
     };
-    trackOnClick = (event) => {
+    trackOnClick = async (event) => {
         let track = event.target;
-        Modal.confirm({
-            title: 'Confirm Dialog',
-            message: 'Create a new game with ' + track.childNodes[2].childNodes[0].innerText,
-            buttonClass: 'green',
-            onConfirm: () => {
-                this.playTrack(track);
-                this.setState(() => ({
-                    page: "game"
-                }));
-            }
-          });
+        let imgUrl = this.state.tracks[track.id].album.images[0].url;
+        this.getPalette(imgUrl).then(() => {
+            console.log(this.playingPalette);
+
+            Modal.confirm({
+                title: 'Confirm Dialog',
+                message: 'Create a new game with ' + track.childNodes[2].childNodes[0].innerText,
+                img_src: track.childNodes[0].childNodes[0].src,
+                palette: this.playingPalette,
+                buttonClass: 'green',
+                onConfirm: () => {
+                    this.playTrack(track);
+                    this.setState(() => ({
+                        page: "game"
+                    }));
+                }
+            });
+        });
+        
     };
 
     playTrack = (track) => {
-        let img = track.childNodes[0].childNodes[0];
-        let imgUrl = this.state.tracks[track.id].album.images[0].url;
-        this.getPalette(imgUrl);
         // TODO: play the track
+        console.log(this.state.tracks[track.id]);
+        this.setState(() => ({
+            track_num: parseInt(track.id)
+        }))
+        //setTimeout(() => { this.setState(() => ({track_num: this.state.track_num+1}))}, 10000);
     }
 
     searchSpotify = (key) => {
@@ -217,14 +227,16 @@ class App extends React.Component {
     }
 
     getPalette(sourceImageUrl) {
-        let img = new Image();
-        img.onload = () => {
-            this.playingImg = img;
-            this.playingPalette = this.colorThief.getPalette(img);
-            //console.log(this.playingPalette);
-        };
-        img.crossOrigin = 'Anonymous';
-        img.src = sourceImageUrl;
+        return new Promise((resolve, reject) => {
+            let img = new Image();
+            img.onload = () => {
+                this.playingImg = img;
+                this.playingPalette = this.colorThief.getPalette(img);
+                resolve();
+            };
+            img.crossOrigin = 'Anonymous';
+            img.src = sourceImageUrl;
+        });
     }
 
     constructor(props) {
@@ -245,6 +257,7 @@ class App extends React.Component {
                 img: null
             },
             tracks: null,
+            track_num: null,
             search: false
         };
     }
@@ -326,6 +339,8 @@ class App extends React.Component {
                         selectTrack={this.trackOnClick.bind(this)}/>
                 :
                 <Pool />;
+            // In Pool:
+            // <button onClick={this.newGameOnClick}>NewGame</button>
             return (
                 <div>     
                     <Header user={this.state.user}
@@ -333,26 +348,39 @@ class App extends React.Component {
                             callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
-                    />   
-                    {page}
-                    <button onClick={this.newGameOnClick}>NewGame</button>
+                    />
+                    <SideBar
+                        tracks={this.state.tracks}
+                        track_num={this.state.track_num}
+                        settingOnClick={this.settingOnClick}
+                    />
+                    <div className="main">
+                        {page}
+                    </div>
                 </div>
             );
         }
         else if (this.state.page === "game") {
             return (
-                <div className="App">
+                <div>
                     <Header user={this.state.user}
                             page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
                     /> 
-                    <Game palette={this.state.palette}
-                          setting={this.state.setting}
-                          record={this.state.record}
-                          callRecv={this.gameStatusReceiver.bind(this)}
+                    <SideBar
+                        tracks={this.state.tracks}
+                        track_num={this.state.track_num}
+                        settingOnClick={this.settingOnClick}
                     />
+                    <div className="main">
+                        <Game palette={this.state.palette}
+                            setting={this.state.setting}
+                            record={this.state.record}
+                            callRecv={this.gameStatusReceiver.bind(this)}
+                        />
+                    </div>
                 </div>
             );
         }
@@ -360,6 +388,19 @@ class App extends React.Component {
 
         }
     }
+}
+
+const SideBar = ({ tracks, track_num, settingOnClick }) => {
+    let player = tracks === null || track_num === null? null:
+        (<Player track_url={tracks[track_num].external_urls.spotify}
+            height="330"
+        />);
+    return (
+        <div class="sidenav">
+            <button onClick={settingOnClick}>Settings</button>
+            {player}
+        </div>
+    )
 }
 
 export default App;

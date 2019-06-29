@@ -10,10 +10,6 @@ var spotifyApi = new SpotifyWebApi({
     callbackURL: 'http://localhost:3001/auth/spotify/callback'
 });
 
-function setAccessToken(access_token) {
-    spotifyApi.setAccessToken(access_token);
-}
-
 // this is our get method
 // this method fetches all available data in our database
 spotify_router.get('/search', (req, res) => {

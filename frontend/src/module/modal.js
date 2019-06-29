@@ -13,6 +13,8 @@ var Modal = (function() {
     var defaults = {
       title: 'Notification', // modal title
       message: '', // modal message
+      img_src: null,
+      palette: null,
       autoOpen: true, // show modal when declared
       closeOnEscape: true, // close when escape key pressed
       closeOnBlur: true, // close when overlay is clicked
@@ -45,6 +47,13 @@ var Modal = (function() {
     modal: '<div class="modal-box">' +
       '<div class="modal-title">[[title]]<div class="close-modal" data-action="close">&times;</div></div>' +
       '<div class="modal-message">[[message]]</div>' +
+      '<img src=[[img_src]]></img>' + 
+      '<svg height="40">' + 
+        '<rect x="30" y="0" width="64" height="40" style="fill:[[color1]];"/>' + 
+        '<rect x="100" y="0" width="64" height="40" style="fill:[[color2]];"/>' + 
+        '<rect x="170" y="0" width="64" height="40" style="fill:[[color3]];"/>' + 
+        '<rect x="240" y="0" width="64" height="40" style="fill:[[color4]];"/>' + 
+      '</svg>' + 
       '<div class="modal-buttons">[[buttons]]</div>' +
       '</div>',
     btn: '<div class="modal-btn" data-action="close">[[label]]</div>',
@@ -68,6 +77,15 @@ var Modal = (function() {
 
     modalTmplt = modalTmplt.replace('[[title]]', options.title);
     modalTmplt = modalTmplt.replace('[[message]]', options.message);
+    if (options.img_src) {
+      modalTmplt = modalTmplt.replace('[[img_src]]', options.img_src);
+    }
+    else {
+      modalTmplt = modalTmplt.replace('<img src=[[img_src]]></img>', '');
+    }
+    for (var i = 0; i < 4; i++) {
+      modalTmplt = modalTmplt.replace('[[color' + (i+1) + ']]', 'rgb(' + options.palette[i][0] + ',' + options.palette[i][1] + ',' + options.palette[i][2] + ')');
+    }
 
     // add buttons based on modal type
     switch (type) {

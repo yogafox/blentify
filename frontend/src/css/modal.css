@@ -45,6 +45,7 @@
       border-bottom: 1px solid #E1E4E5;
       text-overflow: ellipsis;
       overflow: hidden; }
+
     .modal .modal-box .modal-buttons {
       font-size: 0.9em; }
       .modal .modal-box .modal-buttons:before, .modal .modal-box .modal-buttons:after {
@@ -54,22 +55,22 @@
         clear: both; }
       .modal .modal-box .modal-buttons .modal-btn {
         float: left;
-        width: 50%;
+        width: 49%;
         text-align: center;
         cursor: pointer;
-        height: 60px;
+        height: 56px;
         line-height: 60px;
         -webkit-transition: 0.2s ease-out;
         transition: 0.2s ease-out;
         text-overflow: ellipsis;
         overflow: hidden;
-        white-space: nowrap; }
+        white-space: nowrap;
+        border: 2px solid #E1E4E5;
+      }
         .modal .modal-box .modal-buttons .modal-btn.btn-confirm {
           font-weight: bold; }
         .modal .modal-box .modal-buttons .modal-btn.btn-alert {
           width: 100%; }
-        .modal .modal-box .modal-buttons .modal-btn + .modal-btn {
-          border-left: 1px solid #E1E4E5; }
         .modal .modal-box .modal-buttons .modal-btn:hover {
           background-color: #E7EBED; }
         .modal .modal-box .modal-buttons .modal-btn.red {
