@@ -4,6 +4,7 @@ const randomInt = function (base, top) {
 };
 
 const randomChoice = function (array) {
+    //console.log("randomChoice");
     return array[Math.floor(array.length * Math.random())];
 };
 
@@ -232,6 +233,7 @@ class Map {
     }
 
     static randomStep(type) {
+        //console.log("randomStep");
         let HSLStep = [],
             retStep = [];
         if (type === "PureHue") HSLStep =  Map.randomHSLStep("PureHue");
@@ -240,12 +242,18 @@ class Map {
         else {
             retStep = (Map.COLOR_TYPE === 'RGB') ? Map.randomRGBStep(type) : Map.randomHSLStep(type);
             while (Map.zeroStep(retStep)) {
+                //console.log("zero");
                 retStep = (Map.COLOR_TYPE === 'RGB') ? Map.randomRGBStep(type) : Map.randomHSLStep(type);
             }
             return retStep;
         }
         retStep = (Map.COLOR_TYPE === 'RGB') ? Map.HSLtoRGB(HSLStep) : HSLStep;
-        while (Map.zeroStep(retStep)) retStep = (Map.COLOR_TYPE === 'RGB') ? Map.HSLtoRGB(HSLStep) : HSLStep;
+        while (Map.zeroStep(retStep)) {
+            //console.log("zero2");
+            //retStep = (Map.COLOR_TYPE === 'RGB') ? Map.HSLtoRGB(HSLStep) : HSLStep;
+            retStep = (Map.COLOR_TYPE === 'RGB') ? Map.randomRGBStep(type) : Map.randomHSLStep(type);
+        }
+        //console.log("randomStep done");
         return retStep;
     }
 
@@ -307,6 +315,7 @@ class Map {
         let line = [startColor];
         for (let i = 0; i < length - 1; i++) {
             let newColor = Map.addStep(line[i], step);
+            //console.log("stepLineMaker");
             if (Map.validColor(newColor)) line.push(newColor);
             else {
                 line = [];
@@ -360,6 +369,7 @@ class Map {
                 }
             }
         }
+        //console.log(ret);
         return ret;
     }
 
@@ -370,11 +380,14 @@ class Map {
             while (ret.length === 0 || ret[0].length !== length) {
                 //console.log("consLineMaker 1");
                 let step = Map.randomStep(randomChoice(this.pureStepMap));
+                //console.log("after randomStep");
                 while (Map.properStep(step, length) === false) {
                     //console.log("consLineMaker 2");
+                    //console.log(step);
                     step = Map.randomStep(randomChoice(this.pureStepMap));
                 }
-                //console.log("consLineMaker 1.5");
+                //console.log("after while loop")
+                //console.log("before consStepLineMaker");
                 ret = Map.consStepLineMaker(length, step, constraints);
             }
         } else if (constraints.length >= 2) {
@@ -382,6 +395,7 @@ class Map {
                 step = Map.interpolate(constraints[0][1], constraints[1][1], placeDiff);
             ret = Map.consStepLineMaker(length, step, constraints);
         }
+        //console.log(ret);
         return ret;
     }
 
@@ -704,6 +718,7 @@ class Map {
     };
 
     mapLiner = (type) => {
+        //console.log("Map liner");
         this.lines = [];
         if (type === 1) {
             let line = Map.consLineMaker(this.width, []);

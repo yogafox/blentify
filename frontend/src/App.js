@@ -136,12 +136,19 @@ class App extends React.Component {
     };
     mainPageOnClick = () => {
         if (this.gameCommander !== null) this.gameCommander("save");
-        if (this.state.user.name === defaultUser.name)
-            return;
-        this.setState(() => ({
-            page : "main",
-            search: false
-        }));
+        this.gameCommander("save");
+        if (this.state.user.name === defaultUser.name) {
+            this.setState(() => ({
+                page : "welcome",
+                search: false
+            }));
+        }
+        else {
+            this.setState(() => ({
+                page : "main",
+                search: false
+            }));
+        }
     };
     newGameOnClick = () => {
         if (this.state.status === "logout") {
