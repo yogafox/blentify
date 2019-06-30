@@ -368,7 +368,7 @@ class Map {
         let ret = [];
         if (constraints.length === 0 || constraints.length === 1) {
             while (ret.length === 0 || ret[0].length !== length) {
-                //console.log("consLineMaker 1");
+                console.log("consLineMaker 1");
                 let step = Map.randomStep(randomChoice(this.pureStepMap));
                 while (Map.properStep(step, length) === false) {
                     //console.log("consLineMaker 2");
@@ -704,6 +704,7 @@ class Map {
     };
 
     mapLiner = (type) => {
+        console.log("Map liner");
         this.lines = [];
         if (type === 1) {
             let line = Map.consLineMaker(this.width, []);
@@ -1173,7 +1174,7 @@ class Map {
         this.setSize(this.type);
         this.setMap(this.type);
         if (this.palette.length === 0) {
-            //console.log("not given", this.palette);
+            console.log("not given", this.palette);
             this.mapLiner(this.type);
             this.colorizeMap(this.type);
             while (Map.uniqueColorArray(this.idToColor) === false) {
@@ -1182,7 +1183,7 @@ class Map {
             }
         }
         else {
-            //console.log("given", this.palette);
+            console.log("given", this.palette);
             if (this.palette.length < 2) {
                 //console.log("add complement");
                 let oppositeColor = Map.oppositeColor(this.palette[0], Map.COLOR_TYPE);
