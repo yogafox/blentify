@@ -9,6 +9,7 @@ const Player = ({track_url, height}) => {
         <div class="bottom">
             <iframe 
                 src={track_embed_url} 
+                title="Now Playing..."
                 height={height} 
                 frameBorder="0"
                 allowtransparency="true"

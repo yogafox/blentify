@@ -7,7 +7,7 @@ export default ({page, user, callLogout, callMainPage, callSearch}) => {
                 <span className="user__info__img">
                     <img src={user.img} className="img-responsive" />
                 </span>
-                <span className="user__info__name container">
+                <span className="user__info__name small_container">
                     <span className="first">{user.name}</span>
                 </span>
             </div>
@@ -16,7 +16,7 @@ export default ({page, user, callLogout, callMainPage, callSearch}) => {
                 <button onClick={callLogout}>
                     <div className="vertical-align">
                         <ion-icon name="log-out"></ion-icon>
-                        <p className="container">logout</p>
+                        <p className="small_container">logout</p>
                     </div>
                 </button>
             </div>
