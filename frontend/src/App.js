@@ -359,6 +359,7 @@ class App extends React.Component {
                 <div>
                     <Header user={this.state.user}
                             page={this.state.page}
+                            callLogin={this.loginOnClick}
                             callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} />
                     <div className="__center container">
