@@ -5,6 +5,10 @@
 }
 
 .container {
+  margin: 60px 10px;
+}
+
+.small_container {
   margin: 0px 10px;
 }
 

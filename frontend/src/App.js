@@ -22,6 +22,12 @@ let defaultSetting = {
     style: "default",
     difficulty: +0 // [0, 3], 0 means random
 };
+let defaultUser = {
+    id: 0,                  // unique
+    name: null,    // not guaranteed to be unique
+    img: null
+};
+
 
 class App extends React.Component {
     gameStatusReceiver = (key) => {
@@ -99,6 +105,7 @@ class App extends React.Component {
         localStorage.removeItem('expire');
         this.setState(() => ({
           status: "logout",
+          user: defaultUser,
           page: "welcome"
         }));
     };
@@ -129,6 +136,8 @@ class App extends React.Component {
     };
     mainPageOnClick = () => {
         this.gameCommander("save");
+        if (this.state.user.name === defaultUser.name)
+            return;
         this.setState(() => ({
             page : "main",
             search: false
@@ -158,7 +167,7 @@ class App extends React.Component {
         while (!track.classList.contains("track")) {
             track = track.parentNode;
         }
-        let imgUrl = this.state.tracks[track.id].album.images[0].url;
+        let imgUrl = this.state.displayTracks[track.id].album.images[0].url;
         this.getPalette(imgUrl).then(() => {
             console.log(this.playingPalette);
 
@@ -170,7 +179,6 @@ class App extends React.Component {
                 buttonClass: 'green',
                 onConfirm: () => {
                     this.playTrack(track);
-                    this.playingAlbumName = this.state.tracks[track.id].album.name;
                     this.setState(() => ({
                         page: "game"
                     }));
@@ -182,8 +190,9 @@ class App extends React.Component {
 
     playTrack = (track) => {
         // TODO: play the track
-        console.log(this.state.tracks[track.id]);
+        this.playingAlbumName = this.state.displayTracks[track.id].album.name;
         this.setState(() => ({
+            playTracks: this.state.displayTracks,
             track_num: parseInt(track.id)
         }))
         //setTimeout(() => { this.setState(() => ({track_num: this.state.track_num+1}))}, 10000);
@@ -202,7 +211,7 @@ class App extends React.Component {
             .then((data) => {
                 if (data.tracks.items.length) {
                     this.setState(() => ({ 
-                        tracks: data.tracks.items,
+                        displayTracks: data.tracks.items,
                         search: true 
                     }));
                 }
@@ -262,12 +271,9 @@ class App extends React.Component {
             setting: settingString,
             record: "",
             session: null,    // TODO
-            user: {
-                id: 0,                  // unique
-                name: null,    // not guaranteed to be unique
-                img: null
-            },
-            tracks: null,
+            user: defaultUser,
+            displayTracks: null,
+            playTracks: null,
             track_num: null,
             search: false
         };
@@ -341,18 +347,28 @@ class App extends React.Component {
         if (this.state.page === "welcome") {
             return (
                 <div>
-                    <Header page={this.state.page}
+                    <Header user={this.state.user}
+                            page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} />
-                    <button className="button-dark" onClick={this.loginOnClick}>Login</button>
-                    <button onClick={this.newGameOnClick}>NewGame</button>
+                    <div className="__center container">
+                        <h1 className="__center row">Welcome to Blentify!</h1>
+                        <p className="__center row">Step 1: Login with your Spotify account (or click "New Game" without account)</p>
+                        <p className="__center row">Step 2: Select a song or a game record and start a Blendoku game!</p>
+                        <div className="row">
+                            <button className="button-dark" onClick={this.loginOnClick}>Login</button>
+                        </div>
+                        <div className="row">
+                            <button onClick={this.newGameOnClick}>New Game</button>
+                        </div>
+                    </div>
                 </div>
             );
         }
 
         if (this.state.page === "main") {
             let page = this.state.search? 
-                <Search tracks={this.state.tracks}
+                <Search tracks={this.state.displayTracks}
                         selectTrack={this.trackOnClick.bind(this)}/>
                 :
                 <Pool
@@ -366,11 +382,12 @@ class App extends React.Component {
                     <Header user={this.state.user}
                             page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)} 
+                            callLogin={this.loginOnClick}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
                     />
                     <SideBar
-                        tracks={this.state.tracks}
+                        tracks={this.state.playTracks}
                         track_num={this.state.track_num}
                         setDifficultyOnClick={this.setDifficultyOnClick}
                         setting={this.state.setting}
@@ -387,11 +404,12 @@ class App extends React.Component {
                     <Header user={this.state.user}
                             page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)}
+                            callLogin={this.loginOnClick}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
                     /> 
                     <SideBar
-                        tracks={this.state.tracks}
+                        tracks={this.state.playTracks}
                         track_num={this.state.track_num}
                         setDifficultyOnClick={this.setDifficultyOnClick}
                         setting={this.state.setting}
@@ -424,15 +442,15 @@ const SideBar = ({ tracks, track_num, setDifficultyOnClick, setting }) => {
     setting = JSON.parse(setting);
     let buttonDifficulty = ['random', '1', '2', '3'].map((option, idx) => {
         if (setting.difficulty === idx)
-            return <button className="button-activate" onClick={setDifficultyOnClick}>{option}</button>;
+            return <button className="button-activate" onClick={setDifficultyOnClick} key={idx}>{option}</button>;
         else
-            return <button onClick={setDifficultyOnClick}>{option}</button>;
+            return <button onClick={setDifficultyOnClick} key={idx}>{option}</button>;
     });
     let buttonStyle = ['default', '1', '2', '3'].map((option, idx) => {
         if (setting.style === option)
-            return <button className="button-activate">{option}</button>;
+            return <button className="button-activate" key={idx}>{option}</button>;
         else
-            return <button>{option}</button>;
+            return <button key={idx}>{option}</button>;
     });
 
     return (
