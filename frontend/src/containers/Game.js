@@ -248,6 +248,7 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
         this.gameStatusSender = this.props.callRecv;
+        this.props.gameCommanderRecv({callback: this.recordSaver.bind(this)});
     }
     componentWillMount() {
         console.log(this.props);
@@ -397,7 +398,8 @@ Game.propTypes = {
     record: PropTypes.string,
     callRecv: PropTypes.func,
     playingAlbum: PropTypes.string,
-    playingImg: PropTypes.element
+    playingImg: PropTypes.element,
+    gameCommanderRecv: PropTypes.func
 };
 
 export default Game;

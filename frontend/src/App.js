@@ -35,18 +35,20 @@ class App extends React.Component {
             // Todo
             console.log("end game");
             console.log(this.state.user.id);
+            console.log(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
             this.userSaver(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
         }
         else if (key.gameStatus === "save") {
             // Todo: send recorded data string to DB
             console.log("save game");
-            console.log(this.state.user.id);
+            console.log(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
             this.userSaver(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
             this.setState(()=>({ page : "main" }));
         }
         else if (key.gameStatus === "exit") {
             console.log("exit game");
-            this.userSaver(this.state.user.id, key.record);
+            console.log(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
+            this.userSaver(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
 
         }
     };
@@ -59,6 +61,7 @@ class App extends React.Component {
             record: gameRecord
         };
         let message = JSON.stringify(data);
+        console.log(user, message);
         this.putDataToDB(user, message);
     };
     setStyleOnClick = (e) => {
@@ -79,11 +82,11 @@ class App extends React.Component {
         localStorage.setItem('setting', newSetting);
     };
     buttonOnClick = (e) => {
-        for (var i = 0; i < 3; i++) {
+        for (let i = 0; i < 3; i++) {
             e.target.parentNode.childNodes[i].classList.remove("button-activate");
         }
         e.target.classList.add("button-activate");
-    }
+    };
     getSpotifyURL = ({ client_id, scopes, redirect_uri }) => {
         return 'https://accounts.spotify.com/authorize?' + 
               'client_id=' + client_id + 
@@ -121,7 +124,11 @@ class App extends React.Component {
             this.getMe(access_token);
         };
     };
+    gameCommanderRecv = (key) => {
+        this.gameCommander = key.callback;
+    };
     mainPageOnClick = () => {
+        this.gameCommander("save");
         this.setState(() => ({
             page : "main",
             search: false
@@ -395,8 +402,9 @@ class App extends React.Component {
                             setting={this.state.setting}
                             record={this.state.record}
                             callRecv={this.gameStatusReceiver.bind(this)}
-                            playingAlbum={this.playingAlbum}
+                            playingAlbum={this.playingAlbumName}
                             playingImg={this.playingImg}
+                            gameCommanderRecv = {this.gameCommanderRecv.bind(this)}
                         />
                     </div>
                 </div>
