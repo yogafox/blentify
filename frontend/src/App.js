@@ -35,13 +35,13 @@ class App extends React.Component {
             // Todo
             console.log("end game");
             console.log(this.state.user.id);
-            this.userSaver(this.state.user.id, key.record);
+            this.userSaver(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
         }
         else if (key.gameStatus === "save") {
             // Todo: send recorded data string to DB
             console.log("save game");
             console.log(this.state.user.id);
-            this.userSaver(this.state.user.id, key.record);
+            this.userSaver(this.state.user.id, key.record, key.playedAlbum, key.playedImg);
             this.setState(()=>({ page : "main" }));
         }
         else if (key.gameStatus === "exit") {
@@ -50,11 +50,12 @@ class App extends React.Component {
 
         }
     };
-    userSaver = (user, gameRecord) => {
+    userSaver = (user, gameRecord, playedAlbum, playedImg) => {
         let data = {
             user: user,
             cover: "An Image Object",
-            image: "An Image Object",
+            image: playedImg,
+            album: playedAlbum,
             record: gameRecord
         };
         let message = JSON.stringify(data);
@@ -363,12 +364,16 @@ class App extends React.Component {
                         tracks={this.state.tracks}
                         track_num={this.state.track_num}
                         setDifficultyOnClick={this.setDifficultyOnClick}
+
                     />
                     <div className="main">
-                        <Game palette={this.playingPalette}
+                        <Game
+                            palette={this.playingPalette}
                             setting={this.state.setting}
                             record={this.state.record}
                             callRecv={this.gameStatusReceiver.bind(this)}
+                            playingAlbum={this.playingAlbum}
+                            playingImg={this.playingImg}
                         />
                     </div>
                 </div>
