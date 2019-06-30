@@ -18,8 +18,6 @@ const APP_HOST = "http://localhost";
 const APP_API_PORT = 3001;
 const APP_CLIENT_PORT = 3000;
 
-let palette = [[123, 123, 123], [123, 222, 234]]; // An array of RGB color
-
 let defaultSetting = {
     style: "default",
     difficulty: +0 // [0, 3], 0 means random
@@ -36,7 +34,8 @@ class App extends React.Component {
         if (key.gameStatus === "end") {
             // Todo
             console.log("end game");
-            this.setState(()=>({ page : "main" }));
+            console.log(this.state.user.id);
+            this.userSaver(this.state.user.id, key.record);
         }
         else if (key.gameStatus === "save") {
             // Todo: send recorded data string to DB
@@ -51,47 +50,37 @@ class App extends React.Component {
 
         }
     };
-    userGameDeleter = () => {
-        // Todo
-    };
     userSaver = (user, gameRecord) => {
         let data = {
             user: user,
+            cover: "An Image Object",
             image: "An Image Object",
             record: gameRecord
         };
         let message = JSON.stringify(data);
         this.putDataToDB(user, message);
     };
-    userLoader = (user) => {
-        let userGames = [];
-        for (let i = 0; i < this.state.data.length; i++) {
-            if (this.state.data[i].user === user) {
-                let game = this.state.data[i].message;
-                userGames.push(game);
-            }
-        }
-        this.setState(() => ({userGames : userGames}));
-    };
     setStyleOnClick = () => {
         // Todo
     };
-    setDifficultyOnClick = () => {
-        // Todo
+    setDifficultyOnClick = (e) => {
+        let target = e.target.innerHTML,
+            difficulty = 0;
+        if (target !== "random") difficulty = +target;
+        let oldSetting = JSON.parse(this.state.setting);
+        oldSetting.difficulty = difficulty;
+        let newSetting = JSON.stringify(oldSetting);
+        this.setState(() => ({
+            setting: newSetting
+        }));
     };
-    settingOnClick = () => {
-        // Todo
-        // Render Setting Menu && set setting state && refresh settingString
-    };
-
     getSpotifyURL = ({ client_id, scopes, redirect_uri }) => {
         return 'https://accounts.spotify.com/authorize?' + 
               'client_id=' + client_id + 
               '&scopes=' + encodeURIComponent(scopes.join(' ')) + 
               '&redirect_uri=' + encodeURIComponent(redirect_uri) + 
               '&response_type=token';
-    }
-
+    };
     logoutOnClick = () => {
         localStorage.removeItem('session');
         localStorage.removeItem('expire');
@@ -99,8 +88,7 @@ class App extends React.Component {
           status: "logout",
           page: "welcome"
         }));
-    }
-
+    };
     loginOnClick = () => {
         var popup = window.open(
           this.getSpotifyURL({
@@ -124,8 +112,6 @@ class App extends React.Component {
         };
     };
     mainPageOnClick = () => {
-        // Todo
-        // Change this.page to make game call gameStatusReceiver
         this.setState(() => ({
             page : "main",
             search: false
@@ -138,9 +124,10 @@ class App extends React.Component {
         }
         this.setState(() => ({page : "game"}));
     };
-    gameLoaderOnClick = (event) => {
-        let nextGameTarget = event.target;
-        // Todo
+    gameRecordRecv = (key) => {
+        this.setState(() => ({
+            record: key.record
+        }));
     };
     searchOnClick = async (event) => {
         if (event.keyCode === 13 || event.keyCode === undefined) {
@@ -242,7 +229,7 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         let settingString = JSON.stringify(defaultSetting);
-
+        this.playingPalette = [];
         this.colorThief = new ColorThief();
         this.state = {
             page: "welcome",
@@ -338,9 +325,12 @@ class App extends React.Component {
                 <Search tracks={this.state.tracks}
                         selectTrack={this.trackOnClick.bind(this)}/>
                 :
-                <Pool />;
-            // In Pool:
-            // <button onClick={this.newGameOnClick}>NewGame</button>
+                <Pool
+                    userId={this.state.user.id}
+                    data={this.state.data}
+                    callback={this.gameRecordRecv.bind(this)}
+                    newGameOnClick={this.newGameOnClick.bind(this)}
+                />;
             return (
                 <div>     
                     <Header user={this.state.user}
@@ -372,10 +362,10 @@ class App extends React.Component {
                     <SideBar
                         tracks={this.state.tracks}
                         track_num={this.state.track_num}
-                        settingOnClick={this.settingOnClick}
+                        setDifficultyOnClick={this.setDifficultyOnClick}
                     />
                     <div className="main">
-                        <Game palette={this.state.palette}
+                        <Game palette={this.playingPalette}
                             setting={this.state.setting}
                             record={this.state.record}
                             callRecv={this.gameStatusReceiver.bind(this)}
@@ -390,14 +380,32 @@ class App extends React.Component {
     }
 }
 
-const SideBar = ({ tracks, track_num, settingOnClick }) => {
+const SideBar = ({ tracks, track_num, setDifficultyOnClick }) => {
     let player = tracks === null || track_num === null? null:
         (<Player track_url={tracks[track_num].external_urls.spotify}
             height="330"
         />);
     return (
         <div class="sidenav">
-            <button onClick={settingOnClick}>Settings</button>
+            <div className="dropdown">
+                <button className="dropbtn">Difficulty</button>
+                <div className="dropdown-content">
+                    <button onClick={setDifficultyOnClick}>random</button>
+                    <button onClick={setDifficultyOnClick}>1</button>
+                    <button onClick={setDifficultyOnClick}>2</button>
+                    <button onClick={setDifficultyOnClick}>3</button>
+                </div>
+            </div>
+            <div className="dropdown">
+                <button className="dropbtn">Style</button>
+                <div className="dropdown-content">
+                    <button >default</button>
+                    <button >1</button>
+                    <button >2</button>
+                    <button >3</button>
+                </div>
+
+            </div>
             {player}
         </div>
     )

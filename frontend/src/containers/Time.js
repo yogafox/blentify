@@ -7,14 +7,10 @@ class Time extends React.Component {
         super(props);
         this.state = {time : this.props.initTime};
         this.sender = this.props.callRecv;
+        this.props.timeCommanderRecv({callback: this.commandCallback.bind(this)});
     }
-    componentWillMount() {
-        this.setState(
-            {status : this.props.state,
-                place : this.props.place,
-                index : this.props.index,
-                color : this.props.color
-            });
+    commandCallback() {
+        return this.state.time;
     }
     componentDidMount() {
         this.timerID = setInterval(() => this.tick(), 1000);
@@ -39,7 +35,8 @@ class Time extends React.Component {
 
 Time.propTypes = {
     initTime: PropTypes.number,
-    callRecv: PropTypes.func
+    callRecv: PropTypes.func,
+    timeCommanderRecv: PropTypes.func
 };
 
 export default Time;

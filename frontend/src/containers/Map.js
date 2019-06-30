@@ -360,6 +360,13 @@ class Map {
         return ret;
     }
 
+    static checkLockList(id, lockList) {
+        for (let i = 0, size = lockList.length; i < size; i++) {
+            if (id === lockList[i]) return true;
+        }
+        return false;
+    };
+
     mapLogger = (type) => {
         for (let row = 0; row < this.height; row++) {
             let rowOut = [];
@@ -476,7 +483,7 @@ class Map {
                 lineToId = [];
             }
             this.tileCount = mapId;
-            this.lineCount = Math.floor(this.height / 2);
+            this.lineCount = Math.ceil(this.height / 2);
         }
         else if (type === 3) {
             this.middle = Math.floor(this.width / 2);
@@ -986,7 +993,6 @@ class Map {
         else {
 
         }
-        this.candidates = this.idToColor.slice();
     };
 
     setLockId = (type) => {
@@ -994,38 +1000,43 @@ class Map {
             lockId = randomInt(0, this.tileCount-1);
         if (type === 1) {
             while (lockId === this.middle) lockId = randomInt(0, this.tileCount - 1);
-            lockList = [lockId];
+            lockList.push(lockId);
         }
         else if (type === 2) {
-            while (lockId % this.width === this.middle) lockId = randomInt(0, this.tileCount - 1);
-            lockList = [lockId];
+            for (let i = 0; i < this.lineCount; i++) {
+                lockId = randomInt(this.width * i, this.width * (i + 1) - 1 );
+                while (lockId % this.width === this.middle) {
+                    lockId = randomInt(this.width * i, this.width * (i + 1) - 1 );
+                }
+                lockList.push(lockId);
+            }
         }
         else if (type === 3) {
             while (lockId % this.width === this.intersectionId) lockId = randomInt(0, this.tileCount - 1);
-            lockList = [lockId];
+            lockList.push(lockId);
         }
         else if (type === 4) {
             while (lockId % this.width === this.intersectionId) lockId = randomInt(0, this.tileCount - 1);
-            lockList = [lockId];
+            lockList.push(lockId);
         }
         else if (type === 5) {
             let corner = [0, this.width - 1, this.tileCount - this.width, this.tileCount-1];
             lockId = corner[randomInt(0, 3)];
-            lockList = [lockId];
+            lockList.push(lockId);
             while (lockId === lockList[0]) lockId = corner[randomInt(0, 3)];
             lockList.push(lockId);
         }
         else if (type === 6) {
             let corner = [0, this.width - 1, this.tileCount - this.width, this.tileCount-1];
             lockId = corner[randomInt(0, 3)];
-            lockList = [lockId];
+            lockList.push(lockId);
             while (lockId === lockList[0]) lockId = corner[randomInt(0, 3)];
             lockList.push(lockId);
         }
         else if (type === 7) {
             let corner = [0, this.width - 1, this.tileCount - this.width, this.tileCount-1];
             lockId = corner[randomInt(0, 3)];
-            lockList = [lockId];
+            lockList.push(lockId);
             while (lockId === lockList[0]) lockId = corner[randomInt(0, 3)];
             lockList.push(lockId);
         }
@@ -1057,6 +1068,60 @@ class Map {
         this.lockList = lockList;
     };
 
+
+    generateInitial = () => {
+        this.mapAnswer = [];
+        this.initGround = [];
+        this.initGroundStatus = [];
+        for (let row = 0; row < this.height; row++) {
+            let lineInit = [],
+                lineStatus = [],
+                lineAnswer = [];
+            for (let column = 0; column < this.width; column++) {
+                let id = this.mapToId[row][column];
+                if (Map.checkLockList(id, this.lockList)) {
+                    lineAnswer.push(this.idToColor[id]);
+                    lineInit.push(this.idToColor[id]);
+                    lineStatus.push("Lock");
+                }
+                else if (this.mapStatus[row][column] === "Space") {
+                    lineAnswer.push([0, 0, 0]);
+                    lineInit.push([0, 0, 0]);
+                    lineStatus.push("Space");
+                }
+                else if (this.mapStatus[row][column] === "Blank") {
+                    lineAnswer.push([0, 0, 0]);
+                    lineInit.push([0, 0, 0]);
+                    lineStatus.push("Blank");
+                }
+                else {
+                    lineAnswer.push(this.idToColor[id]);
+                    lineInit.push([0, 0, 0]);
+                    lineStatus.push("Blank");
+                }
+            }
+            this.mapAnswer.push(lineAnswer.slice());
+            this.initGround.push(lineInit.slice());
+            this.initGroundStatus.push(lineStatus.slice());
+        }
+        this.initCandidate = this.idToColor.slice();
+        this.candidateRowCount = Math.ceil(this.initCandidate.length / 9);
+        this.candidateSize = this.candidateRowCount * 9;
+        for (let id = 0; id < this.candidateSize; id++) {
+            if (Map.checkLockList(id, this.lockList)) this.initCandidate[id] = [0, 0, 0];
+            if (id >= this.tileCount) this.initCandidate.push([0, 0, 0]);
+        }
+    };
+
+    statusChecker = () => {
+        this.candidateStatus = [];
+        for (let id = 0; id < this.candidateSize; id++) {
+            if (Map.sameColor(this.initCandidate[id], [0, 0, 0]))
+                this.candidateStatus.push("Blank");
+            else this.candidateStatus.push("Color");
+        }
+    };
+
     constructor(mapType, palette) {
         this.setType(mapType);
         this.setPalette(palette);
@@ -1065,7 +1130,7 @@ class Map {
         if (this.palette.length === 0) {
             this.mapLiner(this.type);
             this.colorizeMap(this.type);
-            while (Map.uniqueColorArray(this.candidates) === false) {
+            while (Map.uniqueColorArray(this.idToColor) === false) {
                 this.mapLiner(this.type);
                 this.colorizeMap(this.type);
             }
@@ -1077,15 +1142,18 @@ class Map {
             }
             this.paletteLiner(this.type, palette);
             this.colorizeMap(this.type);
-            while (Map.uniqueColorArray(this.candidates) === false) {
+            while (Map.uniqueColorArray(this.idToColor) === false) {
                 this.paletteLiner(this.type, palette);
                 this.colorizeMap(this.type);
             }
         }
-        shuffleArray(this.candidates);
         this.mapLogger("status");
         this.mapLogger("color");
         this.setLockId(this.type);
+        this.generateInitial();
+        shuffleArray(this.initCandidate);
+        this.statusChecker();
+        console.log(this.initCandidate);
     }
 }
 
