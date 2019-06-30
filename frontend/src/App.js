@@ -424,7 +424,7 @@ const SideBar = ({ tracks, track_num, setDifficultyOnClick, setting }) => {
     });
 
     return (
-        <div class="sidenav">
+        <div className="sidenav">
             <div className="dropdown">
                 <button className="dropbtn">Difficulty</button>
                 <div className="dropdown-content">

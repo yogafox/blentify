@@ -3,6 +3,14 @@ const randomInt = function (base, top) {
     return Math.floor(Math.random() * (top - base + 1)) + base;
 };
 
+const randomChoice = function (array) {
+    return array[Math.floor(array.length * Math.random())];
+};
+
+const randomTopChoice = function (array, threshold) {
+    return array[Math.floor(threshold * Math.random())];
+};
+
 const shuffleArray = function (array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
@@ -13,13 +21,13 @@ const shuffleArray = function (array) {
 class Map {
     // constant values
     MAX_MAP_TYPE = 9;
-    static diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [8, 9]];
-
+    static diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [7]];
+    static pureStepMap = ["PureHue", "PureSaturation", "PureLightness", "", "", ""];
     // static COLOR_TYPE = 'RGB';
     static COLOR_TYPE = 'HSL';
     static MAX_RGB_STEP = 30;
     static MIN_RGB_STEP = 10;
-    static MAX_HUE_STEP = 30;
+    static MAX_HUE_STEP = 25;
     static MIN_HUE_STEP = 0;
     static MAX_PERCENT_STEP = 20;
     static MIN_PERCENT_STEP = 0;
@@ -98,7 +106,7 @@ class Map {
         return true;
     }
 
-    static RGBtoHSL(color) {
+    static RGBtoHSL(color, type) {
         let rRatio = Math.max(Math.min(color[0] / 255, 1), 0),
             gRatio = Math.max(Math.min(color[1] / 255, 1), 0),
             bRatio = Math.max(Math.min(color[2] / 255, 1), 0),
@@ -116,6 +124,14 @@ class Map {
             hue = hue / 6;
         } else {
             hue = saturation = 0;
+        }
+        if (type === "light") {
+            lightness = 0.5;
+        } else if (type === "saturate") {
+            saturation = 0.5;
+        } else if (type === "full") {
+            lightness = 0.5;
+            saturation = 0.5;
         }
         return [Math.round(hue * 360), Math.round(saturation * 100), Math.round(lightness * 100)];
     }
@@ -182,9 +198,9 @@ class Map {
 
     static randomColorHSL(type) {
         let h = randomInt(0, 359),
-            s = randomInt(0, 100),
-            l = randomInt(0, 100);
-        if (type === "PureColor") return [h, 1, 50];
+            s = randomInt(10, 90),
+            l = randomInt(10, 90);
+        if (type === "PureColor") return [h, 100, 50];
         return [h, s, l];
     }
 
@@ -302,11 +318,13 @@ class Map {
 
     static consStepLineMaker(length, step, constraints) {
         // constraints: an array of [place, color] tuple
+        //console.log("consStepLineMaker", length, step, constraints);
         let ret = [];
         if (constraints.length === 0) {
             let baseColor = Map.randomColor();
             ret = Map.stepLineMaker(length, baseColor, step);
             while (ret[0].length !== length) {
+                //console.log("basecolor");
                 baseColor = Map.randomColor();
                 ret = Map.stepLineMaker(length, baseColor, step);
             }
@@ -314,6 +332,7 @@ class Map {
             let place = constraints[0][0],
                 color = constraints[0][1];
             while (place > 0) {
+                //console.log("place");
                 color = Map.minusStep(color, step);
                 place--;
             }
@@ -329,6 +348,7 @@ class Map {
                 let place = constraints[0][0],
                     color = constraints[0][1];
                 while (place > 0) {
+                    //console.log("place");
                     color = Map.minusStep(color, step);
                     place--;
                 }
@@ -348,8 +368,13 @@ class Map {
         let ret = [];
         if (constraints.length === 0 || constraints.length === 1) {
             while (ret.length === 0 || ret[0].length !== length) {
-                let step = Map.randomStep();
-                while (Map.properStep(step, length) === false) step = Map.randomStep();
+                //console.log("consLineMaker 1");
+                let step = Map.randomStep(randomChoice(this.pureStepMap));
+                while (Map.properStep(step, length) === false) {
+                    //console.log("consLineMaker 2");
+                    step = Map.randomStep(randomChoice(this.pureStepMap));
+                }
+                //console.log("consLineMaker 1.5");
                 ret = Map.consStepLineMaker(length, step, constraints);
             }
         } else if (constraints.length >= 2) {
@@ -391,8 +416,12 @@ class Map {
     };
 
     setPalette = (RGBPalette) => {
+        //console.log(RGBPalette);
         if (Map.COLOR_TYPE === "RGB") this.palette = RGBPalette;
-        else this.palette = RGBPalette.map((color) => (Map.RGBtoHSL(color)));
+        else {
+            this.palette = RGBPalette.map((color) => (Map.RGBtoHSL(color, "full")));
+        }
+        //console.log(this.palette);
     };
 
     setSize = (type) => {
@@ -789,10 +818,13 @@ class Map {
     paletteLiner = (type, palette) => {
         this.lines = [];
         if (type === 1) {
-            let line = Map.consLineMaker(this.width, [[0, palette[0]]]);
+            //console.log("type 1");
+            let randomPlace = randomInt(0, this.width-1);
+            let line = Map.consLineMaker(this.width, [[randomPlace, palette[0]]]);
             this.lines.push(line);
         }
         else if (type === 2) {
+            //console.log("type 2");
             for (let i = 0; i < this.lineCount; i++) {
                 let line = Map.consLineMaker(this.width, []);
                 if (i < palette.length) line = Map.consLineMaker(this.width, [[0, palette[i]]]);
@@ -800,6 +832,7 @@ class Map {
             }
         }
         else if (type === 3) {
+            //console.log("type 3");
             let line = Map.consLineMaker(this.width, [[0, palette[0]]]),
                 intersectionColor = line[0][this.columnPlace].slice();
             this.lines.push(line);
@@ -807,6 +840,7 @@ class Map {
             this.lines.push(line);
         }
         else if (type === 4) {
+            //console.log("type 4");
             let line = Map.consLineMaker(this.width, [[0, palette[0]]]),
                 intersectionColor = line[0][this.columnPlace].slice();
             this.lines.push(line);
@@ -815,8 +849,10 @@ class Map {
         }
         else if (type === 5) {
             while (this.lines.length !== this.height) {
+                //console.log("type 5");
+                let constraintColor = randomTopChoice(palette, 3);
                 this.lines = [];
-                let line = Map.consLineMaker(this.width, [[0, palette[0]]]),
+                let line = Map.consLineMaker(this.width, [[0, constraintColor]]),
                     intersectionColor = line[0][0].slice(),
                     rowStep = line[1].slice(),
                     columnLine = Map.consLineMaker(this.height, [[0, intersectionColor]]);
@@ -824,16 +860,18 @@ class Map {
                 for (let i = 1; i < this.height; i++) {
                     intersectionColor = columnLine[0][i].slice();
                     line = Map.stepLineMaker(this.width, intersectionColor, rowStep);
-                    if (line[0].length ===  0) break;
+                    if (line[0].length === 0) break;
                     this.lines.push(line);
                 }
             }
         }
         else if (type === 6) {
             while (this.lines.length !== this.height) {
+                //console.log("type 6");
+                let constraintColor = randomTopChoice(palette, 3);
                 this.lines = [];
-                let leftLine = Map.consLineMaker(this.height, [[0, palette[0]]]),
-                    rightLine = Map.consLineMaker(this.height, [[this.height - 1, palette[1]]]);
+                let leftLine = Map.consLineMaker(this.height, [[0, constraintColor]]),
+                    rightLine = Map.consLineMaker(this.height, []);
                 for (let i = 0; i < this.height; i++) {
                     let leftColor = leftLine[0][i].slice(),
                         rightColor = rightLine[0][i].slice(),
@@ -845,9 +883,11 @@ class Map {
         }
         else if (type === 7) {
             while (this.lines.length !== this.height) {
+                //console.log("type 7");
+                let constraintColor = randomTopChoice(palette, 3);
                 this.lines = [];
-                let leftLine = Map.consLineMaker(this.height, [[0, palette[0]]]),
-                    rightLine = Map.consLineMaker(this.height, [[0, palette[1]]]);
+                let leftLine = Map.consLineMaker(this.height, [[0, constraintColor]]),
+                    rightLine = Map.consLineMaker(this.height, []);
                 for (let i = 0; i < this.height; i++) {
                     let leftColor = leftLine[0][i].slice(),
                         rightColor = rightLine[0][i].slice(),
@@ -859,8 +899,10 @@ class Map {
         }
         else if (type === 8) {
             while (this.lines.length !== this.height) {
+                //console.log("type 8");
+                let constraintColor = randomTopChoice(palette, 3);
                 this.lines = [];
-                let bottomLine = Map.consLineMaker(this.width, [[0, palette[0]]]),
+                let bottomLine = Map.consLineMaker(this.width, [[0, constraintColor]]),
                     rowStep = bottomLine[1],
                     intersectionColor = bottomLine[0][this.middle].slice(),
                     middleLine = Map.consLineMaker(this.height, [[this.height - 1, intersectionColor]]);
@@ -874,8 +916,10 @@ class Map {
         }
         else if (type === 9) {
             while (this.lines.length !== this.height) {
+                //console.log("type 9");
                 this.lines = [];
-                let bottomLine = Map.consLineMaker(this.width, [[0, palette[0]]]),
+                let constraintColor = randomTopChoice(palette, 3);
+                let bottomLine = Map.consLineMaker(this.width, [[0, constraintColor]]),
                     rowStep = bottomLine[1],
                     intersectionColor = bottomLine[0][this.middle].slice(),
                     middleLine = Map.consLineMaker(this.height, [[this.height - 1, intersectionColor]]);
@@ -899,6 +943,7 @@ class Map {
     };
 
     colorizeMap = (type) => {
+        //console.log("colorize");
         this.idToColor = [];
         if (type === 1) {
             for (let column = 0; column < this.width; column++) {
@@ -1128,6 +1173,7 @@ class Map {
         this.setSize(this.type);
         this.setMap(this.type);
         if (this.palette.length === 0) {
+            //console.log("not given", this.palette);
             this.mapLiner(this.type);
             this.colorizeMap(this.type);
             while (Map.uniqueColorArray(this.idToColor) === false) {
@@ -1136,14 +1182,17 @@ class Map {
             }
         }
         else {
+            //console.log("given", this.palette);
             if (this.palette.length < 2) {
+                //console.log("add complement");
                 let oppositeColor = Map.oppositeColor(this.palette[0], Map.COLOR_TYPE);
                 this.palette.push(oppositeColor);
             }
-            this.paletteLiner(this.type, palette);
+            this.paletteLiner(this.type, this.palette);
             this.colorizeMap(this.type);
             while (Map.uniqueColorArray(this.idToColor) === false) {
-                this.paletteLiner(this.type, palette);
+                //console.log("rerender");
+                this.paletteLiner(this.type, this.palette);
                 this.colorizeMap(this.type);
             }
         }
