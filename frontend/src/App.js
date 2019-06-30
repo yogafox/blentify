@@ -23,7 +23,7 @@ let defaultSetting = {
     difficulty: +0 // [0, 3], 0 means random
 };
 let defaultUser = {
-    id: 0,                  // unique
+    id: "",                  // unique
     name: null,    // not guaranteed to be unique
     img: null
 };
@@ -135,7 +135,7 @@ class App extends React.Component {
         this.gameCommander = key.callback;
     };
     mainPageOnClick = () => {
-        this.gameCommander("save");
+        if (this.gameCommander !== null) this.gameCommander("save");
         if (this.state.user.name === defaultUser.name)
             return;
         this.setState(() => ({
@@ -263,6 +263,7 @@ class App extends React.Component {
         this.playingPalette = [];
         this.playingImg = null;
         this.playingAlbumName = null;
+        this.gameCommander = null;
         this.colorThief = new ColorThief();
         this.state = {
             page: "welcome",
@@ -337,6 +338,7 @@ class App extends React.Component {
     };
 
     putDataToDB = (user, message) => {
+        console.log(user, message);
         axios.post(APP_HOST + ':' + APP_API_PORT + '/api/putDataToken', {
             token: user,
             message: message,
