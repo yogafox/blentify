@@ -13,14 +13,13 @@ class GameLoader extends React.Component {
         this.props.loaderOnClick(key);
     };
     render() {
-        let divStyle = this.divStyler();
         return (
             <button
                 className="GameLoader"
                 id={this.state.id}
                 onClick={this.onClick}
             >
-                <p>{this.state.status === "Space" ? "" : this.state.status}</p>
+                <p>{this.props.album}</p>
             </button>
         );
     }

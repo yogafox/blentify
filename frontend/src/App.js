@@ -136,7 +136,6 @@ class App extends React.Component {
     };
     mainPageOnClick = () => {
         if (this.gameCommander !== null) this.gameCommander("save");
-        this.gameCommander("save");
         if (this.state.user.name === defaultUser.name) {
             this.setState(() => ({
                 page : "welcome",
@@ -273,6 +272,7 @@ class App extends React.Component {
         this.gameCommander = null;
         this.colorThief = new ColorThief();
         this.state = {
+            data: [],
             page: "welcome",
             status: "logout",
             palette: [],
@@ -351,7 +351,8 @@ class App extends React.Component {
             message: message,
         });
     };
-        
+
+
     render() {
         if (this.state.page === "welcome") {
             return (

@@ -79,13 +79,6 @@ var Modal = (function() {
 
     modalTmplt = modalTmplt.replace('[[title]]', options.title);
     modalTmplt = modalTmplt.replace('[[message]]', options.message);
-    if (options.img_src) {
-      modalTmplt = modalTmplt.replace('[[img_src]]', options.img_src);
-      
-    }
-    else {
-      modalTmplt = modalTmplt.replace('<img src=[[img_src]]></img>', '');
-    }
     
     // add buttons based on modal type
     switch (type) {
@@ -94,13 +87,22 @@ var Modal = (function() {
         buttons += templates.btnConfirm.replace('[[label]]', options.buttonLbl).replace('[[classes]]', options.buttonClass);
         modalTmplt = modalTmplt.replace('[[buttons]]', buttons);
 
-        var img = templates.img.replace('[[img_src]]', options.img_src);
+        if (options.img_src) {
+          var img = templates.img.replace('[[img_src]]', options.img_src);
+        }
+        else {
+          var img = '';
+        }
         modalTmplt = modalTmplt.replace('[[img]]', img);
 
-        var palette = templates.palette;
-        for (var i = 0; i < 4; i++) {
-          palette = palette.replace('[[color' + (i+1) + ']]', 'rgb(' + options.palette[i][0] + ',' + options.palette[i][1] + ',' + options.palette[i][2] + ')');
+        console.log(options);
+        if (options.palette !== null && options.palette !== undefined && options.palette.length >= 4) {
+          var palette = templates.palette;
+          for (var i = 0; i < 4; i++) {
+            palette = palette.replace('[[color' + (i + 1) + ']]', 'rgb(' + options.palette[i][0] + ',' + options.palette[i][1] + ',' + options.palette[i][2] + ')');
+          }
         }
+        else  var palette = '';
         modalTmplt = modalTmplt.replace('[[palette]]', palette);
         break;
       case 'alert':

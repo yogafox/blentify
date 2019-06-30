@@ -75,7 +75,7 @@ class Tile extends React.Component {
                     onClick={this.onClick}
                     key={this.props.key}
             >
-                <p>{this.state.status === "Space" ? "" : this.state.status}</p>
+                <p>{this.state.status === "Space" ? "" : (this.state.status === "Blank" ? "" : this.state.status)}</p>
                 {/*<p>{this.state.id}</p>*/}
             </button>
         );

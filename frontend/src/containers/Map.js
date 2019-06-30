@@ -22,7 +22,7 @@ const shuffleArray = function (array) {
 class Map {
     // constant values
     MAX_MAP_TYPE = 9;
-    static diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [7]];
+    static diffTypeMap = [[0], [1, 2, 3, 4], [5, 6, 7], [8, 9]];
     static pureStepMap = ["PureHue", "PureSaturation", "PureLightness", "", "", ""];
     // static COLOR_TYPE = 'RGB';
     static COLOR_TYPE = 'HSL';

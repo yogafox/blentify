@@ -5,6 +5,7 @@ import Tile from './Tile';
 
 import html2canvas from 'html2canvas';
 import PropTypes from 'prop-types';
+import Modal from "../module/modal";
 
 const randomInt = function (base, top) {
     // return a integer with value in [base, top]
@@ -61,6 +62,20 @@ class Game extends React.Component {
             }
         }
         console.log("win");
+        let same_palette = this.props.palette.length > 3? " with this palette":"";
+        this.setState(()=>({
+            removeCandidate : true,
+            removeGround : true
+        }));
+        Modal.confirm({
+            title: 'You Win',
+            message: "You Win! Wanna play another game" + same_palette + "?",
+            palette: this.props.palette,
+            buttonClass: 'green',
+            onConfirm: () => {
+                this.newGameOnClick();
+            }
+        });
         this.recordSaver("end");
     };
     exchange = function (keyA, keyB) {
@@ -243,6 +258,30 @@ class Game extends React.Component {
         let removeAnswer = !this.state.removeAnswer;
         this.setState(() => ({
             removeAnswer : removeAnswer
+        }));
+    };
+    newGameOnClick = () => {
+        this.difficulty = (this.setting.difficulty === 0) ?
+            randomInt(1, this.MAX_DIFFICULTY) : this.setting.difficulty;
+        this.type = this.diffToType(this.difficulty);
+        this.map = new Map(this.type, this.props.palette);
+        this.record = [];
+        let now = {
+            "candidate": this.map.initCandidate.slice(),
+            "candidateStatus": this.map.candidateStatus.slice(),
+            "ground": copyMatrix(this.map.initGround),
+            "groundStatus": copyMatrix(this.map.initGroundStatus)
+        };
+        let recordNow = Object.assign({}, now);
+        this.now = now;
+        this.record.push(recordNow);
+        this.recordPlace = 0;
+        this.maxRecordPlace = 0;
+        this.makeTiles();
+        this.setState(()=>({
+            removeCandidate : false,
+            removeGround: false,
+            removeAnswer: true
         }));
     };
     constructor(props) {

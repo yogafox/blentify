@@ -7,6 +7,10 @@ const imageEqual = function (imageA, imageB) {
 }
 
 class Pool extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {albumRows : []};
+    }
     userGameDeleter = () => {
         // Todo
     };
@@ -25,11 +29,12 @@ class Pool extends React.Component {
         this.userGames.sort(this.compareAlbum);
         let lastAlbum = this.userGames[0].album,
             albumGroup = [],
-            latestTime = this.userGames[0].time;
+            latestTime = this.userGames[0].time,
+            albumtime = [];
         albumGroup.push(this.userGames[0]);
         for (let i = 1, size = this.userGames.length; i < size; i++) {
             if (lastAlbum !== this.userGames[i].album) {
-                albumGroup.lastest = latestTime;
+                albumtime.push(latestTime);
                 this.recordedData.push(Object.assign({}, albumGroup));
                 latestTime = 0;
                 albumGroup = [];
@@ -38,13 +43,16 @@ class Pool extends React.Component {
                 albumGroup.push(this.userGames[i]);
             }
         }
-        this.recordedData.sort(this.compareTime);
+        albumtime.push(latestTime);
+        //this.recordedData.sort(this.compareTime);
+        console.log(this.recordedData, albumtime);
     };
     userIdLoader = (userId) => {
+        console.log(userId);
         this.userGames = [];
         if (!this.props.data) return;
         for (let i = 0; i < this.props.data.length; i++) {
-            if (this.props.data[i].user === userId) {
+            if (this.props.data[i].token === userId) {
                 let game = JSON.parse(this.props.data[i].message);
                 game.time = i;
                 this.userGames.push(game);
@@ -52,20 +60,33 @@ class Pool extends React.Component {
         }
     };
     componentWillMount(){
+        this.dataLength = this.props.data.length;
         this.userIdLoader(this.props.userId);
         this.sortByAlbumTime();
+        this.makeLoader();
         console.log(this.recordedData);
     }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        if (nextProps.data.length > this.dataLength) return true;
+    }
+
+    componentWillUpdate(nextProps, nextState, nextContext) {
+        this.userIdLoader(this.props.userId);
+        this.sortByAlbumTime();
+
+    }
+
     gameLoadOnClick = (key) => {
         this.props.callback(key);
     };
 
     makeLoader = () => {
+        console.log(this.recordedData);
         this.albumRows = [];
         for (let i = 0, size = this.recordedData.length; i < size; i++) {
-            let albumRow = [];
             for (let game = 0, times = this.recordedData[i].length; game < times; game++) {
-                albumRow.push(
+                this.albumRows.push(
                     <GameLoader
                         album={this.recordedData[i][game].album}
                         img={this.recordedData[i][game].img}
@@ -76,23 +97,31 @@ class Pool extends React.Component {
                     />
                 )
             }
-            this.albumRows.push(albumRow);
         }
+        console.log(this.albumRows);
+        this.setState(() => ({
+            albumRows: this.albumRows
+        }));
     };
 
     render() {
-        this.makeLoader();
+        // this.userIdLoader(this.props.userId);
+        // this.sortByAlbumTime();
+        // this.makeLoader();
+
+        // let albums = this.albumRows.map((row) =>  <div className="row" children={row} />);
         return (
             <div>
                 <button onClick={this.props.newGameOnClick}>NewGame</button>
-                {this.albumRows}
+                <div children={this.state.albumRows}>
+                </div>
             </div>
         );
     }
 };
 
 Pool.propTypes = {
-    userId: PropTypes.number,
+    userId: PropTypes.string,
     data: PropTypes.array,
     callback: PropTypes.func,
     newGameOnClick: PropTypes.func

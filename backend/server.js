@@ -87,7 +87,6 @@ router.post('/putDataToken', (req, res) => {
   let data = new Data();
 
   const { token, message } = req.body;
-  console.log(token, message);
   if ((!token && token !== 0) || !message) {
     return res.json({
       success: false,
