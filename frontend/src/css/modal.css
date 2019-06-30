@@ -65,9 +65,9 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        border: 2px solid #E1E4E5;
       }
         .modal .modal-box .modal-buttons .modal-btn.btn-confirm {
+          border: 2px solid #E1E4E5;
           font-weight: bold; }
         .modal .modal-box .modal-buttons .modal-btn.btn-alert {
           width: 100%; }

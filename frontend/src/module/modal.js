@@ -47,18 +47,20 @@ var Modal = (function() {
     modal: '<div class="modal-box">' +
       '<div class="modal-title">[[title]]<div class="close-modal" data-action="close">&times;</div></div>' +
       '<div class="modal-message">[[message]]</div>' +
-      '<img src=[[img_src]]></img>' + 
-      '<svg height="40">' + 
-        '<rect x="30" y="0" width="64" height="40" style="fill:[[color1]];"/>' + 
-        '<rect x="100" y="0" width="64" height="40" style="fill:[[color2]];"/>' + 
-        '<rect x="170" y="0" width="64" height="40" style="fill:[[color3]];"/>' + 
-        '<rect x="240" y="0" width="64" height="40" style="fill:[[color4]];"/>' + 
-      '</svg>' + 
+      '[[img]]' +
+      '[[palette]]' +
       '<div class="modal-buttons">[[buttons]]</div>' +
       '</div>',
     btn: '<div class="modal-btn" data-action="close">[[label]]</div>',
     btnAlert: '<div class="modal-btn btn-alert" data-action="close">[[label]]</div>',
-    btnConfirm: '<div class="modal-btn btn-confirm [[classes]]" data-action="confirm">[[label]]</div>'
+    btnConfirm: '<div class="modal-btn btn-confirm [[classes]]" data-action="confirm">[[label]]</div>',
+    img: '<img src=[[img_src]]></img>',
+    palette: '<svg height="40">' + 
+              '<rect x="30" y="0" width="64" height="40" style="fill:[[color1]];"/>' + 
+              '<rect x="100" y="0" width="64" height="40" style="fill:[[color2]];"/>' + 
+              '<rect x="170" y="0" width="64" height="40" style="fill:[[color3]];"/>' + 
+              '<rect x="240" y="0" width="64" height="40" style="fill:[[color4]];"/>' + 
+            '</svg>'
   };
 
   // generates the modal html from the templates given the modal's type and options
@@ -79,24 +81,33 @@ var Modal = (function() {
     modalTmplt = modalTmplt.replace('[[message]]', options.message);
     if (options.img_src) {
       modalTmplt = modalTmplt.replace('[[img_src]]', options.img_src);
+      
     }
     else {
       modalTmplt = modalTmplt.replace('<img src=[[img_src]]></img>', '');
     }
-    for (var i = 0; i < 4; i++) {
-      modalTmplt = modalTmplt.replace('[[color' + (i+1) + ']]', 'rgb(' + options.palette[i][0] + ',' + options.palette[i][1] + ',' + options.palette[i][2] + ')');
-    }
-
+    
     // add buttons based on modal type
     switch (type) {
       case 'confirm':
         var buttons = templates.btn.replace('[[label]]', options.cancelLbl);
         buttons += templates.btnConfirm.replace('[[label]]', options.buttonLbl).replace('[[classes]]', options.buttonClass);
         modalTmplt = modalTmplt.replace('[[buttons]]', buttons);
+
+        var img = templates.img.replace('[[img_src]]', options.img_src);
+        modalTmplt = modalTmplt.replace('[[img]]', img);
+
+        var palette = templates.palette;
+        for (var i = 0; i < 4; i++) {
+          palette = palette.replace('[[color' + (i+1) + ']]', 'rgb(' + options.palette[i][0] + ',' + options.palette[i][1] + ',' + options.palette[i][2] + ')');
+        }
+        modalTmplt = modalTmplt.replace('[[palette]]', palette);
         break;
       case 'alert':
         var buttons = templates.btnAlert.replace('[[label]]', options.buttonLbl);
         modalTmplt = modalTmplt.replace('[[buttons]]', buttons);
+        modalTmplt = modalTmplt.replace('[[img]]', '');
+        modalTmplt = modalTmplt.replace('[[palette]]', '');
         break;
     }
 

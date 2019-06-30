@@ -6,7 +6,7 @@ const Player = ({track_url, height}) => {
     console.log(track_embed_url);
 
     return (
-        <div>
+        <div class="bottom">
             <iframe 
                 src={track_embed_url} 
                 height={height} 
