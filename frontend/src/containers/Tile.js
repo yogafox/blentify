@@ -6,7 +6,7 @@ class Tile extends React.Component {
     divStyler() {
         if (this.state.status === 'Space') {
             return {
-                backgroundColor: `#181818`
+                backgroundColor: `#282828`
             };
         }
         else if (this.state.status === 'Blank') {
