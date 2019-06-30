@@ -1,6 +1,5 @@
 body {
   background: #282828;
-  font-family: 'Expletus Sans', cursive;
   color:white;
 }
 body a {
@@ -10,9 +9,12 @@ body a:hover {
   color: #c8c8c8;
 }
 
+p {
+  font-family: 'Expletus Sans', cursive;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', serif;
-  
 }
 
 

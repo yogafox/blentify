@@ -22,6 +22,12 @@ let defaultSetting = {
     style: "default",
     difficulty: +0 // [0, 3], 0 means random
 };
+let defaultUser = {
+    id: 0,                  // unique
+    name: null,    // not guaranteed to be unique
+    img: null
+};
+
 
 class App extends React.Component {
     gameStatusReceiver = (key) => {
@@ -96,6 +102,7 @@ class App extends React.Component {
         localStorage.removeItem('expire');
         this.setState(() => ({
           status: "logout",
+          user: defaultUser,
           page: "welcome"
         }));
     };
@@ -122,6 +129,8 @@ class App extends React.Component {
         };
     };
     mainPageOnClick = () => {
+        if (this.state.user.name === defaultUser.name)
+            return;
         this.setState(() => ({
             page : "main",
             search: false
@@ -255,11 +264,7 @@ class App extends React.Component {
             setting: settingString,
             record: "",
             session: null,    // TODO
-            user: {
-                id: 0,                  // unique
-                name: null,    // not guaranteed to be unique
-                img: null
-            },
+            user: defaultUser,
             displayTracks: null,
             playTracks: null,
             track_num: null,
@@ -335,7 +340,8 @@ class App extends React.Component {
         if (this.state.page === "welcome") {
             return (
                 <div>
-                    <Header page={this.state.page}
+                    <Header user={this.state.user}
+                            page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)} 
                             callMainPage={this.mainPageOnClick.bind(this)} />
                     <div className="__center container">
@@ -369,6 +375,7 @@ class App extends React.Component {
                     <Header user={this.state.user}
                             page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)} 
+                            callLogin={this.loginOnClick}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
                     />
@@ -390,6 +397,7 @@ class App extends React.Component {
                     <Header user={this.state.user}
                             page={this.state.page}
                             callLogout={this.logoutOnClick.bind(this)}
+                            callLogin={this.loginOnClick}
                             callMainPage={this.mainPageOnClick.bind(this)} 
                             callSearch={this.searchOnClick}
                     /> 

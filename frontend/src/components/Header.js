@@ -1,7 +1,10 @@
 import React from 'react';
 
-export default ({page, user, callLogout, callMainPage, callSearch}) => {
-    let userBar = !user? null:
+export default ({page, user, callLogout, callLogin, callMainPage, callSearch}) => {
+    console.log(user);
+    let userBar = user.name === null? 
+        (<button className="button-dark" onClick={callLogin}>Login</button>)
+        :
         (<div className="user">
             <div className="user__info vertical-align">
                 <span className="user__info__img">
@@ -24,7 +27,7 @@ export default ({page, user, callLogout, callMainPage, callSearch}) => {
 
     let searchBar = page !== "main"? null:
         (<div className="search vertical-align">
-            <input type="text" size="25" placeholder="Search by song name" onKeyDown={callSearch}/>
+            <input type="text" size="25" placeholder="Search..." onKeyDown={callSearch}/>
             <button id="search" onClick={callSearch}><ion-icon name="search"></ion-icon></button>
         </div>);
 
