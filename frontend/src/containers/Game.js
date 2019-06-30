@@ -65,7 +65,8 @@ class Game extends React.Component {
         let same_palette = this.props.palette.length > 3? " with this palette":"";
         this.setState(()=>({
             removeCandidate : true,
-            removeGround : true
+            removeGround : true,
+            removeAnswer : false
         }));
         Modal.confirm({
             title: 'You Win',

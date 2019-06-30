@@ -69,6 +69,7 @@ class Pool extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         if (nextProps.data.length > this.dataLength) return true;
+        return false;
     }
 
     componentWillUpdate(nextProps, nextState, nextContext) {
@@ -111,12 +112,18 @@ class Pool extends React.Component {
 
         // let albums = this.albumRows.map((row) =>  <div className="row" children={row} />);
         return (
+            <p className="__center row container">You can search music now!</p> 
+        );
+        
+        /*
+        return (
             <div>
                 <button onClick={this.props.newGameOnClick}>NewGame</button>
                 <div children={this.state.albumRows}>
                 </div>
             </div>
         );
+        */
     }
 };
 

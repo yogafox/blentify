@@ -67,6 +67,11 @@ ion-icon:hover {
   margin: 10px;
 }
 
+
+.container {
+  margin: 60px 10px;
+}
+
 .column {
   display: flex;
   flex-direction: column;
