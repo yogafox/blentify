@@ -13,6 +13,11 @@ iframe {
   width: 250px;
 }
 
+.bottom {
+  bottom: 0;
+  position: fixed;
+}
+
 .sidenav {
   height: 100%; /* Full-height: remove this if you want "auto" height */
   width: 250px; /* Set the width of the sidebar */
@@ -22,10 +27,6 @@ iframe {
   background-color: #111; /* Black */
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 20px;
-}
-
-.sidenav :hover {
-  color: #f1f1f1;
 }
 
 .main {
@@ -43,7 +44,7 @@ ion-icon:hover {
 
 
 .header {
-  background: #282828;
+  background: #474747;
   padding: 10px;
   color: #aaaaaa;
   border-bottom: 1px solid #181818;
@@ -805,10 +806,10 @@ ion-icon:hover {
   color: #aaaaaa;
 }
 .tracks .track__title {
-  width: 45%;
+  width: calc(100% - 2000px);
   margin-left: 30px;
   color: white;
-
+  white-space: nowrap;
 }
 .tracks .track__title.featured .title:after {
   content: "-";
@@ -826,9 +827,7 @@ ion-icon:hover {
   margin-right: 0;
 }
 .tracks .track__title.featured .feature:hover {
-  cursor: pointer;
   color: #c8c8c8;
-  text-decoration: underline;
 }
 .tracks .track__explicit .label {
   border: 1px;
@@ -859,9 +858,6 @@ ion-icon:hover {
   }
   .tracks__heading__popularity {
     display: none;
-  }
-  .tracks .track__title {
-    width: auto !important;
   }
   .tracks .track__explicit {
     display: none;
@@ -1161,6 +1157,14 @@ button:not(#search) {
 }
 button:hover {
   cursor: pointer;
+}
+
+.button-activate {
+  background: #ece1a3;
+}
+
+.dropdown-content .button-activate:hover {
+  background: #eedf87;
 }
 
 .button-dark {

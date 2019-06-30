@@ -60,10 +60,12 @@ class App extends React.Component {
         let message = JSON.stringify(data);
         this.putDataToDB(user, message);
     };
-    setStyleOnClick = () => {
+    setStyleOnClick = (e) => {
+        this.buttonOnClick(e);
         // Todo
     };
     setDifficultyOnClick = (e) => {
+        this.buttonOnClick(e);
         let target = e.target.innerHTML,
             difficulty = 0;
         if (target !== "random") difficulty = +target;
@@ -73,7 +75,14 @@ class App extends React.Component {
         this.setState(() => ({
             setting: newSetting
         }));
+        localStorage.setItem('setting', newSetting);
     };
+    buttonOnClick = (e) => {
+        for (var i = 0; i < 3; i++) {
+            e.target.parentNode.childNodes[i].classList.remove("button-activate");
+        }
+        e.target.classList.add("button-activate");
+    }
     getSpotifyURL = ({ client_id, scopes, redirect_uri }) => {
         return 'https://accounts.spotify.com/authorize?' + 
               'client_id=' + client_id + 
@@ -138,6 +147,9 @@ class App extends React.Component {
     };
     trackOnClick = async (event) => {
         let track = event.target;
+        while (!track.classList.contains("track")) {
+            track = track.parentNode;
+        }
         let imgUrl = this.state.tracks[track.id].album.images[0].url;
         this.getPalette(imgUrl).then(() => {
             console.log(this.playingPalette);
@@ -150,6 +162,7 @@ class App extends React.Component {
                 buttonClass: 'green',
                 onConfirm: () => {
                     this.playTrack(track);
+                    this.playingAlbumName = this.state.tracks[track.id].album.name;
                     this.setState(() => ({
                         page: "game"
                     }));
@@ -229,7 +242,10 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         let settingString = JSON.stringify(defaultSetting);
+        this.settingRef = React.createRef();
         this.playingPalette = [];
+        this.playingImg = null;
+        this.playingAlbumName = null;
         this.colorThief = new ColorThief();
         this.state = {
             page: "welcome",
@@ -270,6 +286,12 @@ class App extends React.Component {
             }));
         }
         this.getMe(localStorage.getItem('session'));
+
+        if (localStorage.getItem('setting', null)) {
+            this.setState(() => ({
+                setting: localStorage.getItem('setting')
+            }));
+        }
     }
 
     componentWillUpdate() {
@@ -342,7 +364,8 @@ class App extends React.Component {
                     <SideBar
                         tracks={this.state.tracks}
                         track_num={this.state.track_num}
-                        settingOnClick={this.settingOnClick}
+                        setDifficultyOnClick={this.setDifficultyOnClick}
+                        setting={this.state.setting}
                     />
                     <div className="main">
                         {page}
@@ -363,6 +386,7 @@ class App extends React.Component {
                         tracks={this.state.tracks}
                         track_num={this.state.track_num}
                         setDifficultyOnClick={this.setDifficultyOnClick}
+                        setting={this.state.setting}
                     />
                     <div className="main">
                         <Game palette={this.playingPalette}
@@ -380,29 +404,37 @@ class App extends React.Component {
     }
 }
 
-const SideBar = ({ tracks, track_num, setDifficultyOnClick }) => {
+const SideBar = ({ tracks, track_num, setDifficultyOnClick, setting }) => {
     let player = tracks === null || track_num === null? null:
         (<Player track_url={tracks[track_num].external_urls.spotify}
             height="330"
         />);
+    setting = JSON.parse(setting);
+    let buttonDifficulty = ['random', '1', '2', '3'].map((option, idx) => {
+        if (setting.difficulty === idx)
+            return <button className="button-activate" onClick={setDifficultyOnClick}>{option}</button>;
+        else
+            return <button onClick={setDifficultyOnClick}>{option}</button>;
+    });
+    let buttonStyle = ['default', '1', '2', '3'].map((option, idx) => {
+        if (setting.style === option)
+            return <button className="button-activate">{option}</button>;
+        else
+            return <button>{option}</button>;
+    });
+
     return (
         <div class="sidenav">
             <div className="dropdown">
                 <button className="dropbtn">Difficulty</button>
                 <div className="dropdown-content">
-                    <button onClick={setDifficultyOnClick}>random</button>
-                    <button onClick={setDifficultyOnClick}>1</button>
-                    <button onClick={setDifficultyOnClick}>2</button>
-                    <button onClick={setDifficultyOnClick}>3</button>
+                    {buttonDifficulty}
                 </div>
             </div>
             <div className="dropdown">
                 <button className="dropbtn">Style</button>
                 <div className="dropdown-content">
-                    <button >default</button>
-                    <button >1</button>
-                    <button >2</button>
-                    <button >3</button>
+                    {buttonStyle}
                 </div>
 
             </div>
