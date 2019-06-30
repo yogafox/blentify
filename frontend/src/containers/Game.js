@@ -44,7 +44,9 @@ class Game extends React.Component {
         let recordString = JSON.stringify(record);
         let key = {
             gameStatus: type,
-            record: recordString
+            record: recordString,
+            playedAlbum: this.props.playingAlbum,
+            playedImg: this.props.playingImg
         };
         this.gameStatusSender(key);
     };
@@ -394,6 +396,8 @@ Game.propTypes = {
     setting: PropTypes.string,
     record: PropTypes.string,
     callRecv: PropTypes.func,
+    playingAlbum: PropTypes.string,
+    playingImg: PropTypes.element
 };
 
 export default Game;
